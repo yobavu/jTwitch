@@ -64,7 +64,7 @@ public class OAuth2Authenticate {
                     .setClientSecret(oAuthSupport.getClientSecret())
                     .setRedirectURI(oAuthSupport.getRedirectUri())
                     .setCode(authorizationCode)
-                    .buildBodyMessage();
+                    .buildQueryMessage();
 
             return new TwitchToken(oAuthClient.accessToken(request));
         } catch (OAuthSystemException e) {
