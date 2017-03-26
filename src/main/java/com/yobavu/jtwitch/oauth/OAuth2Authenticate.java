@@ -1,6 +1,7 @@
 package com.yobavu.jtwitch.oauth;
 
 import org.apache.oltu.oauth2.client.OAuthClient;
+import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
@@ -17,6 +18,10 @@ public class OAuth2Authenticate {
 
     private OAuthClient oAuthClient;
     private OAuth2Support oAuthSupport;
+
+    public OAuth2Authenticate(OAuth2Support oAuthSupport) {
+        this.oAuthSupport = oAuthSupport;
+    }
 
     public OAuth2Authenticate(OAuth2Support oAuthSupport, OAuthClient oAuthClient) {
         this.oAuthSupport = oAuthSupport;
@@ -43,6 +48,11 @@ public class OAuth2Authenticate {
     public TwitchToken authenticate(String authorizationCode) {
         if (authorizationCode == null) {
             throw new IllegalArgumentException("Authorization code must not be null");
+        }
+
+        // check in case constructor without oAuthClient was called
+        if (oAuthClient == null) {
+            oAuthClient = new OAuthClient(new URLConnectionClient());
         }
 
         try {
