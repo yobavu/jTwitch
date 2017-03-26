@@ -34,6 +34,7 @@ public class OAuth2Authenticate {
                     .authorizationLocation(AUTHORIZE_ENDPOINT)
                     .setResponseType(RESPONSE_TYPE)
                     .setClientId(oAuthSupport.getClientId())
+                    .setRedirectURI(oAuthSupport.getRedirectUri())
                     .setScope(SCOPES)
                     .buildQueryMessage();
 

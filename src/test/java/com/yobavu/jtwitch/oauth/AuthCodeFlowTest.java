@@ -1,5 +1,6 @@
 package com.yobavu.jtwitch.oauth;
 
+import java.io.FileInputStream;
 import java.util.Properties;
 
 /**
@@ -8,10 +9,10 @@ import java.util.Properties;
 public class AuthCodeFlowTest {
     public static void main(String[] args) throws Exception {
         Properties prop = new Properties();
-        prop.load(AuthCodeFlowTest.class.getResourceAsStream("jtwitch.properties"));
+        prop.load(new FileInputStream("src/test/resources/jtwitch.properties"));
 
         final String redirectUri = "http://localhost/";
-        final String clientId = prop.getProperty("twitch.clientId");
+        final String clientId = prop.getProperty("twitch.clientid");
         final String clientSecret = prop.getProperty("twitch.clientsecret");
 
         OAuth2Support oas = new OAuth2Support(clientId, clientSecret, redirectUri);
