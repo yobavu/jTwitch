@@ -19,63 +19,63 @@ public class User {
     private String updated_at;
 
     /**
-     * Gets the user's id.
+     * Gets user's id.
      */
     public int getId() {
         return _id;
     }
 
     /**
-     * Gets the user's bio.
+     * Gets user's bio.
      */
     public String getBio() {
         return bio;
     }
 
     /**
-     * Gets the user's account creation date.
+     * Gets user's account creation date.
      */
     public String getCreatedAt() {
         return created_at;
     }
 
     /**
-     * Gets the user's display name.
+     * Gets user's display name.
      */
     public String getDisplayName() {
         return display_name;
     }
 
     /**
-     * Get the user's email address.
+     * Gets user's email address.
      */
     public String getEmail() {
         return email;
     }
 
     /**
-     * Check if user's email is verified.
+     * Checks if user's email is verified.
      */
     public boolean isEmailVerified() {
         return email_verified;
     }
 
     /**
-     * Get user's name.
+     * Gets user's name.
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Get user's account type.
+     * Gets user's account type.
      */
     public String getType() {
         return type;
     }
 
     /**
-     * Get date when user's account was last updated.
+     * Gets date when user's account was last updated.
      */
     public String getUpdatedAt() {
         return updated_at;

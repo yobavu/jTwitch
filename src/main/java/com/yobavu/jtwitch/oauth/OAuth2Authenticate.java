@@ -83,11 +83,6 @@ public class OAuth2Authenticate {
         if (credential == null) {
             // authorizing for the first time
 
-            // check in case constructor without oAuthClient was called
-            if (oAuthClient == null) {
-                oAuthClient = new OAuthClient(new URLConnectionClient());
-            }
-
             String authCodeFlowUrl = getAuthorizationCodeFlow();
 
             if (authCodeFlowUrl == null) {
