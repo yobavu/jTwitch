@@ -1,3 +1,7 @@
+/**
+ * Created by Binh Vu (github: yobavu) on 3/25/17.
+ */
+
 package com.yobavu.jtwitch.requests;
 
 import com.yobavu.jtwitch.model.User;
@@ -10,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.IOException;
 
 /**
- * Created by bvu on 3/25/17.
+ * Wrapper for the Twitch user API.
  */
 public class UserRequest {
     private final String API_URL = "https://api.twitch.tv/kraken/";
@@ -23,6 +27,9 @@ public class UserRequest {
         this.accessToken = accessToken;
     }
 
+    /**
+     * Gets user account associated with OAuth 2.0 token.
+     */
     public User getUser() {
         Retrofit retrofit = new Retrofit.Builder().baseUrl(API_URL)
                 .addConverterFactory(GsonConverterFactory.create())

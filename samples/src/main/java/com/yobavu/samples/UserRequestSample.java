@@ -1,19 +1,21 @@
 /**
- * Created by Binh Vu (github: yobavu) on 3/25/17.
+ * Created by Binh Vu (github: yobavu) on 3/26/17.
  */
 
 package com.yobavu.samples;
 
+import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.oauth.OAuth2Authenticate;
 import com.yobavu.jtwitch.oauth.TwitchToken;
+import com.yobavu.jtwitch.requests.UserRequest;
 
 import java.io.FileInputStream;
 import java.util.Properties;
 
 /**
- * Sample showing how to authenticate and get an access token.
+ * Sample showing how to make a request to retrieve a user.
  */
-public class TwitchAuthenticateSample {
+public class UserRequestSample {
     public static void main(String[] args) throws Exception {
         Properties prop = new Properties();
         prop.load(new FileInputStream("samples/src/main/resources/jtwitch.properties"));
@@ -24,8 +26,13 @@ public class TwitchAuthenticateSample {
 
         OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
 
-        TwitchToken twitchToken = oaa.authenticate("sampleUser");
-        System.out.println("Twitch access token: " + twitchToken.getAccessToken());
-        System.out.println("Twitch refresh token: " + twitchToken.getRefreshToken());
+        TwitchToken twitchToken = oaa.authenticate("sampleUse");
+        UserRequest request = new UserRequest(clientId, "OAuth " + twitchToken.getAccessToken());
+
+        User user = request.getUser();
+        System.out.println("User id: " + user.getId());
+        System.out.println("Username: " + user.getDisplayName());
+        System.out.println("User email: " + user.getEmail());
+        System.out.println("Created at: " + user.getCreatedAt());
     }
 }
