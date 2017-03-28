@@ -4,25 +4,56 @@
 
 package com.yobavu.jtwitch.model;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * The Twitch user.
  */
 public class User {
-    private int _id;
+    @SerializedName("_id")
+    private int id;
+
+    @SerializedName("bio")
     private String bio;
-    private String created_at;
-    private String display_name;
+
+    @SerializedName("created_at")
+    private String createdAt;
+
+    @SerializedName("display_name")
+    private String displayName;
+
+    @SerializedName("email")
     private String email;
-    private boolean email_verified;
+
+    @SerializedName("email_verified")
+    private boolean emailVerified;
+
+    @SerializedName("logo")
+    private String logo;
+
+    @SerializedName("name")
     private String name;
+
+    @SerializedName("notifications")
+    private Notifications notifications;
+
+    @SerializedName("partnered")
+    private boolean partnered;
+
+    @SerializedName("twitter_connected")
+    private boolean twitterConnected;
+
+    @SerializedName("type")
     private String type;
-    private String updated_at;
+
+    @SerializedName("updated_at")
+    private String updatedAt;
 
     /**
      * Gets user's id.
      */
     public int getId() {
-        return _id;
+        return id;
     }
 
     /**
@@ -36,14 +67,14 @@ public class User {
      * Gets user's account creation date.
      */
     public String getCreatedAt() {
-        return created_at;
+        return createdAt;
     }
 
     /**
      * Gets user's display name.
      */
     public String getDisplayName() {
-        return display_name;
+        return displayName;
     }
 
     /**
@@ -57,7 +88,14 @@ public class User {
      * Checks if user's email is verified.
      */
     public boolean isEmailVerified() {
-        return email_verified;
+        return emailVerified;
+    }
+
+    /**
+     * Gets user's logo.
+     */
+    public String getLogo() {
+        return logo;
     }
 
     /**
@@ -65,6 +103,27 @@ public class User {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Gets user's notification settings.
+     */
+    public Notifications getNotifications() {
+        return notifications;
+    }
+
+    /**
+     * Check if user is Twitch partnered.
+     */
+    public boolean isPartnered() {
+        return partnered;
+    }
+
+    /**
+     * Check if user is connected to Twitter.
+     */
+    public boolean isTwitterConnected() {
+        return twitterConnected;
     }
 
     /**
@@ -78,6 +137,28 @@ public class User {
      * Gets date when user's account was last updated.
      */
     public String getUpdatedAt() {
-        return updated_at;
+        return updatedAt;
+    }
+
+    public class Notifications {
+        @SerializedName("email")
+        private boolean email;
+
+        @SerializedName("push")
+        private boolean push;
+
+        /**
+         * Check if user has email notifications.
+         */
+        public boolean emailNotification() {
+            return email;
+        }
+
+        /**
+         * Check if user has push notifications.
+         */
+        public boolean pushNotification() {
+            return push;
+        }
     }
 }

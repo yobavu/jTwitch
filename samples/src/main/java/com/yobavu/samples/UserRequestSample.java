@@ -27,7 +27,7 @@ public class UserRequestSample {
         OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
 
         TwitchToken twitchToken = oaa.authenticate("sampleUse");
-        UserRequest request = new UserRequest(clientId, "OAuth " + twitchToken.getAccessToken());
+        UserRequest request = new UserRequest(clientId, twitchToken.getAccessToken());
 
         User user = request.getUser();
         System.out.println("User id: " + user.getId());
