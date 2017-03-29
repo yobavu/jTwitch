@@ -7,7 +7,7 @@ package com.yobavu.jtwitch.model;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * The Twitch user.
+ * A Twitch user.
  */
 public class User {
     @SerializedName("_id")

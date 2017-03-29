@@ -5,7 +5,7 @@
 package com.yobavu.jtwitch.model;
 
 /**
- * Emoticons usable by Twitch user.
+ * Emoticon usable by Twitch user.
  */
 public class UserEmoticon {
     public UserEmoticon() {
