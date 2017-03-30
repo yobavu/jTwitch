@@ -112,6 +112,6 @@ public interface UserService {
     @Headers("Accept: application/vnd.twitchtv.v5+json")
     @GET("users/{userId}/follows/channels")
     Call<UserFollows> getChannelsFollowedByUser(@Header("Client-ID") String clientId, @Header("Authorization") String accessToken,
-                                                @Path("userId") int userId, @Query("limit") int limit, @Query("offset") int offset,
+                                                @Path("userId") int userId, @Query("limit") Integer limit, @Query("offset") Integer offset,
                                                 @Query("direction") String direction, @Query("sortby") String sortby);
 }

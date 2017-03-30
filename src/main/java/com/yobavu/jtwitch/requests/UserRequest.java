@@ -17,8 +17,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * Wrapper for the Twitch user API.
@@ -144,24 +142,34 @@ public class UserRequest {
      *            </li>
      *        </ul>
      */
-    public UserFollows getChannelsFollowedByUser(int userId, Optional<Map<String, Object>> queryParams) {
+    public UserFollows getChannelsFollowedByUser(int userId, Object... queryParams) {
         Integer limit = null;
         Integer offset = null;
         String direction = null;
         String sortby = null;
 
-        if (queryParams.isPresent()) {
-            Map<String, Object> params = queryParams.get();
-            limit = params.containsKey("limit") ? (Integer) params.get("limit") : null;
-            offset = params.containsKey("offset") ? (Integer) params.get("offset") : null;
-            direction = params.containsKey("direction") ? (String) params.get("direction") : null;
-            sortby = params.containsKey("sortby") ? (String) params.get("sortby") : null;
+        if (queryParams.length > 0) {
+            if (queryParams[0] != null) {
+                limit = (Integer) queryParams[0];
+            }
+
+            if (queryParams[1] != null) {
+                offset = (Integer) queryParams[1];
+            }
+
+            if (queryParams[2] != null) {
+                direction = (String) queryParams[2];
+            }
+
+            if (queryParams[3] != null) {
+                sortby = (String) queryParams[3];
+            }
         }
 
-        Call<UserFollows> call = userService.getChannelsFollowedByUser(clientId, "OAuth " + accessToken,
-                                                userId, limit, offset, direction, sortby);
-
         try {
+            Call<UserFollows> call = userService.getChannelsFollowedByUser(clientId, "OAuth " + accessToken,
+                    userId, limit, offset, direction, sortby);
+
             return call.execute().body();
         } catch (IOException e) {
             e.printStackTrace();

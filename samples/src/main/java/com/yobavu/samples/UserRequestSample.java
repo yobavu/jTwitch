@@ -5,6 +5,7 @@
 package com.yobavu.samples;
 
 import com.yobavu.jtwitch.model.User;
+import com.yobavu.jtwitch.model.UserFollows;
 import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.oauth.OAuth2Authenticate;
@@ -62,6 +63,18 @@ public class UserRequestSample {
             System.out.println("Subscribed date: " + uSub.getCreatedAt());
         } else {
             System.out.println("User is not subscribed to channel");
+        }
+
+        System.out.println();
+
+        // getting list of channels followed by user
+        UserFollows userFollows = request.getChannelsFollowedByUser(151146757);
+
+        System.out.println("User is following:");
+
+        for (UserFollows.Follows f : userFollows.getFollows()) {
+            System.out.print("Channel '" + f.getChannel().getDisplayName() + "' which has " +
+                    f.getChannel().getFollowers() + " followers");
         }
     }
 }
