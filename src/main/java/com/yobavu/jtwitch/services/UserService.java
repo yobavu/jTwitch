@@ -6,6 +6,7 @@ package com.yobavu.jtwitch.services;
 
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserEmoticon;
+import com.yobavu.jtwitch.model.UserFollow;
 import com.yobavu.jtwitch.model.UserFollows;
 import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
@@ -14,6 +15,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -76,8 +78,8 @@ public interface UserService {
                                            @Path("userId") int userId);
 
     /**
-     * Check if user is subscribed to a specific channel. Will return null if channel does not have a
-     * subscription program.
+     * Check if user is subscribed to a specific channel. Will return null if user is not subscribed to channel
+     * or channel does not have a subscription program.
      *
      * Requires "user_subscriptions" scope.
      *
@@ -114,4 +116,32 @@ public interface UserService {
     Call<UserFollows> getChannelsFollowedByUser(@Header("Client-ID") String clientId, @Header("Authorization") String accessToken,
                                                 @Path("userId") int userId, @Query("limit") Integer limit, @Query("offset") Integer offset,
                                                 @Query("direction") String direction, @Query("sortby") String sortby);
+
+    /**
+     * Check if user follows a specific channel. Will return null if user is not following channel.
+     *
+     * @param clientId the client id credential.
+     * @param accessToken the access token associated with credential.
+     * @param userId the id for specific user account.
+     * @param channelId the id for specific channel.
+     */
+    @Headers("Accept: application/vnd.twitchtv.v5+json")
+    @GET("users/{userId}/follows/channels/{channelId}")
+    Call<UserFollow> getChannelFollowedByUser(@Header("Client-ID") String clientId, @Header("Authorization") String accessToken,
+                                              @Path("userId") int userId, @Path("channelId") int channelId);
+
+    /**
+     * Add user as a follower for a specific channel.
+     *
+     * Requires "user_follows_edit" scope.
+     *
+     * @param clientId the client id credential.
+     * @param accessToken the access token associated with credential.
+     * @param userId the id for specific user account.
+     * @param channelId the id for specific channel.
+     */
+    @Headers("Accept: application/vnd.twitchtv.v5+json")
+    @PUT("users/{userId}/follows/channels/{channelId}")
+    Call<UserFollow> followChannel(@Header("Client-ID") String clientId, @Header("Authorization") String accessToken,
+                                   @Path("userId") int userId, @Path("channelId") int channelId);
 }

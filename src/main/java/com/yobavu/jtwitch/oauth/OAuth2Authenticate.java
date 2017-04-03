@@ -29,7 +29,7 @@ public class OAuth2Authenticate {
     private final String AUTHORIZE_ENDPOINT = "https://api.twitch.tv/kraken/oauth2/authorize";
     private final String TOKEN_ENDPOINT = "https://api.twitch.tv/kraken/oauth2/token";
     private final String RESPONSE_TYPE = "code";
-    private final String SCOPES = "user_read user_subscriptions";   // todo need better way to construct these
+    private final String SCOPES = "user_read user_subscriptions user_follows_edit";   // todo need better way to construct these
 
     private OAuthClient oAuthClient;
     private OAuth2Support oAuthSupport;

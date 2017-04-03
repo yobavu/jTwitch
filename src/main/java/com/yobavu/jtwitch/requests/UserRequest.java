@@ -6,6 +6,7 @@ package com.yobavu.jtwitch.requests;
 
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserEmoticon;
+import com.yobavu.jtwitch.model.UserFollow;
 import com.yobavu.jtwitch.model.UserFollows;
 import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
@@ -170,6 +171,42 @@ public class UserRequest {
             Call<UserFollows> call = userService.getChannelsFollowedByUser(clientId, "OAuth " + accessToken,
                     userId, limit, offset, direction, sortby);
 
+            return call.execute().body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if user follows a specific channel. Will return null if user is not following channel.
+     *
+     * @param userId the id for specific user account.
+     * @param channelId the id for specific channel.
+     */
+    public UserFollow getChannelFollowedByUser(int userId, int channelId) {
+        Call<UserFollow> call = userService.getChannelFollowedByUser(clientId, "OAuth " + accessToken, userId, channelId);
+
+        try {
+            return call.execute().body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Add user as a follower for a specific channel.
+     *
+     * @param userId the id for specific user account.
+     * @param channelId the id for specific channel.
+     */
+    public UserFollow followChannel(int userId, int channelId) {
+        Call<UserFollow> call = userService.followChannel(clientId, "OAuth " + accessToken, userId, channelId);
+
+        try {
             return call.execute().body();
         } catch (IOException e) {
             e.printStackTrace();

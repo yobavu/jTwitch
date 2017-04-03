@@ -5,6 +5,7 @@
 package com.yobavu.samples;
 
 import com.yobavu.jtwitch.model.User;
+import com.yobavu.jtwitch.model.UserFollow;
 import com.yobavu.jtwitch.model.UserFollows;
 import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
@@ -73,8 +74,35 @@ public class UserRequestSample {
         System.out.println("User is following:");
 
         for (UserFollows.Follows f : userFollows.getFollows()) {
-            System.out.print("Channel '" + f.getChannel().getDisplayName() + "' which has " +
+            System.out.println("Channel '" + f.getChannel().getDisplayName() + "' which has " +
                     f.getChannel().getFollowers() + " followers");
+        }
+
+        System.out.println();
+        System.out.println("Is user following specific channel:");
+
+        // checking if user follows a channel
+        // returns null if user is not following
+        UserFollow uFollow = request.getChannelFollowedByUser(00000000, 30904062);
+
+        if (uFollow != null) {
+            System.out.println("User is following channel: '" + uFollow.getChannel().getName() + "'");
+            System.out.println("Followed date: " + uFollow.getCreatedAt());
+        } else {
+            System.out.println("User is not following channel");
+        }
+
+        System.out.println();
+        System.out.println("Following a channel");
+
+        // follow a channel
+        uFollow = request.followChannel(00000000, 30904062);
+
+        if (uFollow != null) {
+            System.out.println("User is now following channel: '" + uFollow.getChannel().getName() + "'");
+            System.out.println("Followed date: " + uFollow.getCreatedAt());
+        } else {
+            System.out.println("User is not following channel");
         }
     }
 }
