@@ -15,6 +15,9 @@ import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.services.UserService;
 
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -30,17 +33,14 @@ import java.util.List;
 public class TwitchUsersApi {
     private final String API_URL = "https://api.twitch.tv/kraken/";
 
-    private final String clientId;
-    private final String accessToken;
+    private final OkHttpClient.Builder clientBuilder = new OkHttpClient().newBuilder();
 
-    private final Retrofit retrofit = new Retrofit.Builder().baseUrl(API_URL)
-                                            .addConverterFactory(GsonConverterFactory.create())
-                                            .build();
-    private final UserService userService = retrofit.create(UserService.class);
+    private Retrofit retrofit;
+    private UserService userService;
 
     public TwitchUsersApi(String clientId, String accessToken) {
-        this.clientId = clientId;
-        this.accessToken = accessToken;
+        retrofit = create(clientId, accessToken);
+        userService = retrofit.create(UserService.class);
     }
 
     /**
@@ -49,7 +49,7 @@ public class TwitchUsersApi {
      * Requires "user_read" scope.
      */
     public User getUser() throws IOException, TwitchApiException {
-        Call<User> call = userService.getUser(clientId, "OAuth " + accessToken);
+        Call<User> call = userService.getUser();
 
         Response<User> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -68,7 +68,7 @@ public class TwitchUsersApi {
      * @param username the username for specific user account.
      */
     public UserList getUserByUsername(String username) throws IOException, TwitchApiException {
-        Call<UserList> call = userService.getUserByName(clientId, "OAuth " + accessToken, username);
+        Call<UserList> call = userService.getUserByName(username);
 
         Response<UserList> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -86,7 +86,7 @@ public class TwitchUsersApi {
      * @param userId the id for specific user account.
      */
     public User getUserById(int userId) throws IOException, TwitchApiException {
-        Call<User> call = userService.getUserById(clientId, "OAuth " + accessToken, userId);
+        Call<User> call = userService.getUserById(userId);
 
         Response<User> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -119,8 +119,7 @@ public class TwitchUsersApi {
      * @param channelId the id for specific channel.
      */
     public UserSubscription getUserChannelSubscription(int userId, int channelId) throws IOException, TwitchApiException {
-        Call<UserSubscription> call = userService.getUserChannelSubscription(clientId, "OAuth " + accessToken,
-                                                    userId, channelId);
+        Call<UserSubscription> call = userService.getUserChannelSubscription(userId, channelId);
 
         Response<UserSubscription> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -176,8 +175,7 @@ public class TwitchUsersApi {
             }
         }
 
-        Call<UserFollows> call = userService.getChannelsFollowedByUser(clientId, "OAuth " + accessToken,
-                userId, limit, offset, direction, sortby);
+        Call<UserFollows> call = userService.getChannelsFollowedByUser(userId, limit, offset, direction, sortby);
 
         Response<UserFollows> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -196,7 +194,7 @@ public class TwitchUsersApi {
      * @param channelId the id for specific channel.
      */
     public UserFollow getChannelFollowedByUser(int userId, int channelId) throws IOException, TwitchApiException {
-        Call<UserFollow> call = userService.getChannelFollowedByUser(clientId, "OAuth " + accessToken, userId, channelId);
+        Call<UserFollow> call = userService.getChannelFollowedByUser(userId, channelId);
 
         Response<UserFollow> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -215,7 +213,7 @@ public class TwitchUsersApi {
      * @param channelId the id for specific channel.
      */
     public UserFollow followChannel(int userId, int channelId) throws IOException, TwitchApiException {
-        Call<UserFollow> call = userService.followChannel(clientId, "OAuth " + accessToken, userId, channelId);
+        Call<UserFollow> call = userService.followChannel(userId, channelId);
 
         Response<UserFollow> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -225,5 +223,23 @@ public class TwitchUsersApi {
         }
 
         return response.body();
+    }
+
+    private Retrofit create(String clientId, String accessToken) {
+        clientBuilder.addInterceptor(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request request = chain.request().newBuilder().addHeader("Client-ID", clientId)
+                        .addHeader("Authorization", "OAuth " + accessToken)
+                        .addHeader("Accept", "application/vnd.twitchtv.v5+json")
+                        .build();
+                return chain.proceed(request);
+            }
+        });
+
+        return new Retrofit.Builder().baseUrl(API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(clientBuilder.build())
+                .build();
     }
 }

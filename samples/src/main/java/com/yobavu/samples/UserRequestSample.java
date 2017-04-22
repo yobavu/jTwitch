@@ -27,6 +27,7 @@ public class UserRequestSample {
         final String redirectUri = "http://localhost/";
         final String clientId = prop.getProperty("twitch.clientId");
         final String clientSecret = prop.getProperty("twitch.clientSecret");
+        final String userId = prop.getProperty("twitch.userId");
 
         OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
 
@@ -58,7 +59,7 @@ public class UserRequestSample {
 
         // getting user's subscription to a channel
         // returns null if user is not subscribed to channel
-        UserSubscription uSub = usersApi.getUserChannelSubscription(00000000, 5690948);
+        UserSubscription uSub = usersApi.getUserChannelSubscription(Integer.parseInt(userId), 5690948);
 
         if (uSub != null) {
             System.out.println("Subscribed date: " + uSub.getCreatedAt());
@@ -69,7 +70,7 @@ public class UserRequestSample {
         System.out.println();
 
         // getting list of channels followed by user
-        UserFollows userFollows = usersApi.getChannelsFollowedByUser(151146757);
+        UserFollows userFollows = usersApi.getChannelsFollowedByUser(Integer.parseInt(userId));
 
         System.out.println("User is following:");
 
@@ -83,7 +84,7 @@ public class UserRequestSample {
 
         // checking if user follows a channel
         // returns null if user is not following
-        UserFollow uFollow = usersApi.getChannelFollowedByUser(00000000, 30904062);
+        UserFollow uFollow = usersApi.getChannelFollowedByUser(Integer.parseInt(userId), 30904062);
 
         if (uFollow != null) {
             System.out.println("User is following channel: '" + uFollow.getChannel().getName() + "'");
@@ -96,7 +97,7 @@ public class UserRequestSample {
         System.out.println("Following a channel");
 
         // follow a channel
-        uFollow = usersApi.followChannel(00000000, 30904062);
+        uFollow = usersApi.followChannel(Integer.parseInt(userId), 30904062);
 
         if (uFollow != null) {
             System.out.println("User is now following channel: '" + uFollow.getChannel().getName() + "'");

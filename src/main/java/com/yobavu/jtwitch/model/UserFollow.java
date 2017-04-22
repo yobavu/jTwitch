@@ -39,6 +39,4 @@ public class UserFollow {
     public Channel getChannel() {
         return channel;
     }
-
-
 }
