@@ -2,8 +2,11 @@
  * Created by Binh Vu (github: yobavu) on 3/25/17.
  */
 
-package com.yobavu.jtwitch.requests;
+package com.yobavu.jtwitch.api;
 
+import com.yobavu.jtwitch.error.ApiError;
+import com.yobavu.jtwitch.error.ErrorParser;
+import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserEmoticon;
 import com.yobavu.jtwitch.model.UserFollow;
@@ -13,16 +16,18 @@ import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.services.UserService;
 
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
+
 import java.util.List;
 
 /**
- * Wrapper for the Twitch user API.
+ * Wrapper for the Twitch users API.
  */
-public class UserRequest {
+public class TwitchUsersApi {
     private final String API_URL = "https://api.twitch.tv/kraken/";
 
     private final String clientId;
@@ -33,7 +38,7 @@ public class UserRequest {
                                             .build();
     private final UserService userService = retrofit.create(UserService.class);
 
-    public UserRequest(String clientId, String accessToken) {
+    public TwitchUsersApi(String clientId, String accessToken) {
         this.clientId = clientId;
         this.accessToken = accessToken;
     }
@@ -43,16 +48,17 @@ public class UserRequest {
      *
      * Requires "user_read" scope.
      */
-    public User getUser() {
+    public User getUser() throws IOException, TwitchApiException {
         Call<User> call = userService.getUser(clientId, "OAuth " + accessToken);
 
-        try {
-            return call.execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Response<User> response = call.execute();
+        ApiError apiError = ErrorParser.parseError(response);
+
+        if (apiError != null) {
+            throw new TwitchApiException(apiError.getMessage());
         }
 
-        return null;
+        return response.body();
     }
 
     /**
@@ -61,16 +67,17 @@ public class UserRequest {
      *
      * @param username the username for specific user account.
      */
-    public UserList getUserByUsername(String username) {
+    public UserList getUserByUsername(String username) throws IOException, TwitchApiException {
         Call<UserList> call = userService.getUserByName(clientId, "OAuth " + accessToken, username);
 
-        try {
-            return call.execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Response<UserList> response = call.execute();
+        ApiError apiError = ErrorParser.parseError(response);
+
+        if (apiError != null) {
+            throw new TwitchApiException(apiError.getMessage());
         }
 
-        return null;
+        return response.body();
     }
 
     /**
@@ -78,16 +85,17 @@ public class UserRequest {
      *
      * @param userId the id for specific user account.
      */
-    public User getUserById(int userId) {
+    public User getUserById(int userId) throws IOException, TwitchApiException {
         Call<User> call = userService.getUserById(clientId, "OAuth " + accessToken, userId);
 
-        try {
-            return call.execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Response<User> response = call.execute();
+        ApiError apiError = ErrorParser.parseError(response);
+
+        if (apiError != null) {
+            throw new TwitchApiException(apiError.getMessage());
         }
 
-        return null;
+        return response.body();
     }
 
     /**
@@ -110,17 +118,18 @@ public class UserRequest {
      * @param userId the id for specific user account.
      * @param channelId the id for specific channel.
      */
-    public UserSubscription getUserChannelSubscription(int userId, int channelId) {
+    public UserSubscription getUserChannelSubscription(int userId, int channelId) throws IOException, TwitchApiException {
         Call<UserSubscription> call = userService.getUserChannelSubscription(clientId, "OAuth " + accessToken,
                                                     userId, channelId);
 
-        try {
-            return call.execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Response<UserSubscription> response = call.execute();
+        ApiError apiError = ErrorParser.parseError(response);
+
+        if (apiError != null) {
+            throw new TwitchApiException(apiError.getMessage());
         }
 
-        return null;
+        return response.body();
     }
 
     /**
@@ -143,7 +152,7 @@ public class UserRequest {
      *            </li>
      *        </ul>
      */
-    public UserFollows getChannelsFollowedByUser(int userId, Object... queryParams) {
+    public UserFollows getChannelsFollowedByUser(int userId, Object... queryParams) throws IOException, TwitchApiException {
         Integer limit = null;
         Integer offset = null;
         String direction = null;
@@ -167,16 +176,17 @@ public class UserRequest {
             }
         }
 
-        try {
-            Call<UserFollows> call = userService.getChannelsFollowedByUser(clientId, "OAuth " + accessToken,
-                    userId, limit, offset, direction, sortby);
+        Call<UserFollows> call = userService.getChannelsFollowedByUser(clientId, "OAuth " + accessToken,
+                userId, limit, offset, direction, sortby);
 
-            return call.execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Response<UserFollows> response = call.execute();
+        ApiError apiError = ErrorParser.parseError(response);
+
+        if (apiError != null) {
+            throw new TwitchApiException(apiError.getMessage());
         }
 
-        return null;
+        return response.body();
     }
 
     /**
@@ -185,16 +195,17 @@ public class UserRequest {
      * @param userId the id for specific user account.
      * @param channelId the id for specific channel.
      */
-    public UserFollow getChannelFollowedByUser(int userId, int channelId) {
+    public UserFollow getChannelFollowedByUser(int userId, int channelId) throws IOException, TwitchApiException {
         Call<UserFollow> call = userService.getChannelFollowedByUser(clientId, "OAuth " + accessToken, userId, channelId);
 
-        try {
-            return call.execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Response<UserFollow> response = call.execute();
+        ApiError apiError = ErrorParser.parseError(response);
+
+        if (apiError != null) {
+            throw new TwitchApiException(apiError.getMessage());
         }
 
-        return null;
+        return response.body();
     }
 
     /**
@@ -203,15 +214,16 @@ public class UserRequest {
      * @param userId the id for specific user account.
      * @param channelId the id for specific channel.
      */
-    public UserFollow followChannel(int userId, int channelId) {
+    public UserFollow followChannel(int userId, int channelId) throws IOException, TwitchApiException {
         Call<UserFollow> call = userService.followChannel(clientId, "OAuth " + accessToken, userId, channelId);
 
-        try {
-            return call.execute().body();
-        } catch (IOException e) {
-            e.printStackTrace();
+        Response<UserFollow> response = call.execute();
+        ApiError apiError = ErrorParser.parseError(response);
+
+        if (apiError != null) {
+            throw new TwitchApiException(apiError.getMessage());
         }
 
-        return null;
+        return response.body();
     }
 }

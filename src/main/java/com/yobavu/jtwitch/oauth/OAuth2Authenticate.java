@@ -34,8 +34,6 @@ public class OAuth2Authenticate {
     private OAuthClient oAuthClient;
     private OAuth2Support oAuthSupport;
 
-    private Map<String, Object> credentials;
-
     public OAuth2Authenticate(String clientId, String clientSecret, String redirectUri) {
         oAuthClient = new OAuthClient(new URLConnectionClient());
         oAuthSupport = new OAuth2Support(clientId, clientSecret, redirectUri);
@@ -46,22 +44,16 @@ public class OAuth2Authenticate {
      *
      * @return the authorization code flow URI.
      */
-    private String getAuthorizationCodeFlow() {
-        try {
-            OAuthClientRequest request = OAuthClientRequest
-                    .authorizationLocation(AUTHORIZE_ENDPOINT)
-                    .setResponseType(RESPONSE_TYPE)
-                    .setClientId(oAuthSupport.getClientId())
-                    .setRedirectURI(oAuthSupport.getRedirectUri())
-                    .setScope(SCOPES)
-                    .buildQueryMessage();
+    private String getAuthorizationCodeFlow() throws OAuthSystemException {
+        OAuthClientRequest request = OAuthClientRequest
+                .authorizationLocation(AUTHORIZE_ENDPOINT)
+                .setResponseType(RESPONSE_TYPE)
+                .setClientId(oAuthSupport.getClientId())
+                .setRedirectURI(oAuthSupport.getRedirectUri())
+                .setScope(SCOPES)
+                .buildQueryMessage();
 
-            return request.getLocationUri();
-        } catch (OAuthSystemException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return request.getLocationUri();
     }
 
     /**
@@ -73,7 +65,7 @@ public class OAuth2Authenticate {
      * @param userId unique value to associate with token.
      * @return the credential token for making requests to Twitch API.
      */
-    public TwitchToken authenticate(String userId) {
+    public TwitchToken authenticate(String userId) throws OAuthSystemException, OAuthProblemException, ClassNotFoundException, IOException {
         if (userId == null) {
             throw new IllegalArgumentException("Authorization code must not be null");
         }
@@ -82,6 +74,7 @@ public class OAuth2Authenticate {
 
         if (credential == null) {
             // authorizing for the first time
+            Map<String, Object> credentials = new HashMap<>();
 
             String authCodeFlowUrl = getAuthorizationCodeFlow();
 
@@ -97,32 +90,22 @@ public class OAuth2Authenticate {
             String authorizationCode = scan.nextLine();
             scan.close();
 
-            try {
-                OAuthClientRequest request = OAuthClientRequest
-                        .tokenLocation(TOKEN_ENDPOINT)
-                        .setGrantType(GrantType.AUTHORIZATION_CODE)
-                        .setClientId(oAuthSupport.getClientId())
-                        .setClientSecret(oAuthSupport.getClientSecret())
-                        .setRedirectURI(oAuthSupport.getRedirectUri())
-                        .setCode(authorizationCode)
-                        .buildQueryMessage();
+            OAuthClientRequest request = OAuthClientRequest
+                    .tokenLocation(TOKEN_ENDPOINT)
+                    .setGrantType(GrantType.AUTHORIZATION_CODE)
+                    .setClientId(oAuthSupport.getClientId())
+                    .setClientSecret(oAuthSupport.getClientSecret())
+                    .setRedirectURI(oAuthSupport.getRedirectUri())
+                    .setCode(authorizationCode)
+                    .buildQueryMessage();
 
-                credential = new TwitchToken(oAuthClient.accessToken(request));
-                credentials = readSerializable();
+            credential = new TwitchToken(oAuthClient.accessToken(request));
 
-                if (credentials == null) {
-                    credentials = new HashMap<>();
-                }
+            // save the credential to file for later use
+            credentials.put(userId, credential);
+            writeSerializable(credentials);
 
-                credentials.put(userId, credential);
-                writeSerializable(credentials);
-
-                return credential;
-            } catch (OAuthSystemException e) {
-                e.printStackTrace();
-            } catch (OAuthProblemException e) {
-                e.printStackTrace();
-            }
+            return credential;
         }
 
         return credential;
@@ -132,29 +115,24 @@ public class OAuth2Authenticate {
      * Loads the access token for an existing user from the serialized file.
      *
      * @param id the unique id associated with an access token.
-     * @return the credential token for making requests to Twitch API.
+     * @return the credential token for making api to Twitch API.
      */
-    private TwitchToken loadCredential(String id) {
-        boolean justCreated = false;
+    private TwitchToken loadCredential(String id) throws ClassNotFoundException, IOException {
+        File dir = new File(System.getProperty("user.home") + "/.jTwitch/");
+        File serialFile = new File(System.getProperty("user.home") + "/.jTwitch/credentials.ser");
 
-        try {
-            File dir = new File(System.getProperty("user.home") + "/.jTwitch/");
-            File serialFile = new File(System.getProperty("user.home") + "/.jTwitch/credentials.ser");
-
-            if (!dir.exists()) {
-                dir.mkdir();
-            }
-
-            justCreated = serialFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!dir.exists()) {
+            dir.mkdir();
         }
 
-        if (!justCreated) {
-            Map<String, Object> creds = readSerializable();
+        boolean justCreated = serialFile.createNewFile();
 
-            if (creds != null && creds.containsKey(id)) {
-                return (TwitchToken) creds.get(id);
+        // file exists so read from it
+        if (!justCreated) {
+            Map<String, Object> cred = readSerializable();
+
+            if (cred != null && cred.containsKey(id)) {
+                return (TwitchToken) cred.get(id);
             }
         }
 
@@ -166,52 +144,35 @@ public class OAuth2Authenticate {
      *
      * @return map containing credential token.
      */
-    private Map<String, Object> readSerializable() {
+    private Map<String, Object> readSerializable() throws ClassNotFoundException, IOException {
         ObjectInputStream oiStream;
         FileInputStream inStream;
 
-        try {
-            inStream = new FileInputStream(System.getProperty("user.home") + "/.jTwitch/credentials.ser");
-            oiStream = new ObjectInputStream(inStream);
+        inStream = new FileInputStream(System.getProperty("user.home") + "/.jTwitch/credentials.ser");
+        oiStream = new ObjectInputStream(inStream);
 
-            credentials = (HashMap<String, Object>) oiStream.readObject();
+        Map<String, Object> credentials = (HashMap<String, Object>) oiStream.readObject();
 
-            oiStream.close();
-            inStream.close();
+        oiStream.close();
+        inStream.close();
 
-            return credentials;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return credentials;
     }
 
     /**
      * Stores the credential token in a serialized file.
      *
-     * @param creds map containing credential token.
+     * @param cred map containing credential token.
      */
-    private void writeSerializable(Map<String, Object> creds) {
+    private void writeSerializable(Map<String, Object> cred) throws IOException {
         ObjectOutputStream ooStream;
         FileOutputStream outStream;
 
-        try {
-            outStream = new FileOutputStream(System.getProperty("user.home") + "/.jTwitch/credentials.ser");
-            ooStream = new ObjectOutputStream(outStream);
+        outStream = new FileOutputStream(System.getProperty("user.home") + "/.jTwitch/credentials.ser", false);
+        ooStream = new ObjectOutputStream(outStream);
 
-            ooStream.writeObject(creds);
-            ooStream.close();
-            outStream.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ooStream.writeObject(cred);
+        ooStream.close();
+        outStream.close();
     }
 }

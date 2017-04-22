@@ -11,7 +11,7 @@ import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.oauth.OAuth2Authenticate;
 import com.yobavu.jtwitch.oauth.TwitchToken;
-import com.yobavu.jtwitch.requests.UserRequest;
+import com.yobavu.jtwitch.api.TwitchUsersApi;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -31,12 +31,12 @@ public class UserRequestSample {
         OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
 
         TwitchToken twitchToken = oaa.authenticate("sampleUse");
-        UserRequest request = new UserRequest(clientId, twitchToken.getAccessToken());
+        TwitchUsersApi usersApi = new TwitchUsersApi(clientId, twitchToken.getAccessToken());
 
         System.out.println("========== Making USER API request ==========");
 
         // getting user account associated with token
-        User user = request.getUser();
+        User user = usersApi.getUser();
 
         System.out.println("User id: " + user.getId());
         System.out.println("Username: " + user.getDisplayName());
@@ -46,7 +46,7 @@ public class UserRequestSample {
         System.out.println();
 
         // getting user account by username
-        UserList userList = request.getUserByUsername("saddummy");
+        UserList userList = usersApi.getUserByUsername("saddummy");
 
         for (User u : userList.getUsers()) {
             System.out.println("User id: " + u.getId());
@@ -58,7 +58,7 @@ public class UserRequestSample {
 
         // getting user's subscription to a channel
         // returns null if user is not subscribed to channel
-        UserSubscription uSub = request.getUserChannelSubscription(00000000, 5690948);
+        UserSubscription uSub = usersApi.getUserChannelSubscription(00000000, 5690948);
 
         if (uSub != null) {
             System.out.println("Subscribed date: " + uSub.getCreatedAt());
@@ -69,7 +69,7 @@ public class UserRequestSample {
         System.out.println();
 
         // getting list of channels followed by user
-        UserFollows userFollows = request.getChannelsFollowedByUser(151146757);
+        UserFollows userFollows = usersApi.getChannelsFollowedByUser(151146757);
 
         System.out.println("User is following:");
 
@@ -83,7 +83,7 @@ public class UserRequestSample {
 
         // checking if user follows a channel
         // returns null if user is not following
-        UserFollow uFollow = request.getChannelFollowedByUser(00000000, 30904062);
+        UserFollow uFollow = usersApi.getChannelFollowedByUser(00000000, 30904062);
 
         if (uFollow != null) {
             System.out.println("User is following channel: '" + uFollow.getChannel().getName() + "'");
@@ -96,7 +96,7 @@ public class UserRequestSample {
         System.out.println("Following a channel");
 
         // follow a channel
-        uFollow = request.followChannel(00000000, 30904062);
+        uFollow = usersApi.followChannel(00000000, 30904062);
 
         if (uFollow != null) {
             System.out.println("User is now following channel: '" + uFollow.getChannel().getName() + "'");
