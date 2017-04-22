@@ -15,9 +15,7 @@ import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.services.UserService;
 
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -33,14 +31,16 @@ import java.util.List;
 public class TwitchUsersApi {
     private final String API_URL = "https://api.twitch.tv/kraken/";
 
-    private final OkHttpClient.Builder clientBuilder = new OkHttpClient().newBuilder();
-
-    private Retrofit retrofit;
+//    private Retrofit retrofit;
     private UserService userService;
 
-    public TwitchUsersApi(String clientId, String accessToken) {
-        retrofit = create(clientId, accessToken);
-        userService = retrofit.create(UserService.class);
+    public TwitchUsersApi(OkHttpClient.Builder clientBuilder) {
+        userService = new Retrofit.Builder()
+                .baseUrl(API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(clientBuilder.build())
+                .build()
+                .create(UserService.class);
     }
 
     /**
@@ -223,23 +223,5 @@ public class TwitchUsersApi {
         }
 
         return response.body();
-    }
-
-    private Retrofit create(String clientId, String accessToken) {
-        clientBuilder.addInterceptor(new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request request = chain.request().newBuilder().addHeader("Client-ID", clientId)
-                        .addHeader("Authorization", "OAuth " + accessToken)
-                        .addHeader("Accept", "application/vnd.twitchtv.v5+json")
-                        .build();
-                return chain.proceed(request);
-            }
-        });
-
-        return new Retrofit.Builder().baseUrl(API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(clientBuilder.build())
-                .build();
     }
 }

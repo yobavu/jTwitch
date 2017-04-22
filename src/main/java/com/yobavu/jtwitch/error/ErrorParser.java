@@ -14,6 +14,8 @@ import java.io.IOException;
  * Parses a response to check for errors.
  */
 public final class ErrorParser {
+    private ErrorParser() {}
+
     public static ApiError parseError(Response<?> response) {
         if (response.isSuccessful()) {
             return null;

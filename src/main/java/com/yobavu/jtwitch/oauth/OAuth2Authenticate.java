@@ -4,6 +4,7 @@
 
 package com.yobavu.jtwitch.oauth;
 
+import com.yobavu.jtwitch.util.TwitchUtil;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
@@ -70,7 +71,7 @@ public class OAuth2Authenticate {
             throw new IllegalArgumentException("Authorization code must not be null");
         }
 
-        TwitchToken credential = loadCredential(userId);
+        TwitchToken credential = TwitchUtil.loadCredential(userId);
 
         if (credential == null) {
             // authorizing for the first time
@@ -103,76 +104,11 @@ public class OAuth2Authenticate {
 
             // save the credential to file for later use
             credentials.put(userId, credential);
-            writeSerializable(credentials);
+            TwitchUtil.writeSerializable(credentials);
 
             return credential;
         }
 
         return credential;
-    }
-
-    /**
-     * Loads the access token for an existing user from the serialized file.
-     *
-     * @param id the unique id associated with an access token.
-     * @return the credential token for making requests to Twitch API.
-     */
-    private TwitchToken loadCredential(String id) throws ClassNotFoundException, IOException {
-        File dir = new File(System.getProperty("user.home") + "/.jTwitch/");
-        File serialFile = new File(System.getProperty("user.home") + "/.jTwitch/credentials.ser");
-
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
-
-        boolean justCreated = serialFile.createNewFile();
-
-        // file exists so read from it
-        if (!justCreated) {
-            Map<String, Object> cred = readSerializable();
-
-            if (cred != null && cred.containsKey(id)) {
-                return (TwitchToken) cred.get(id);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Reads the serialized files for existing credential tokens.
-     *
-     * @return map containing credential token.
-     */
-    private Map<String, Object> readSerializable() throws ClassNotFoundException, IOException {
-        ObjectInputStream oiStream;
-        FileInputStream inStream;
-
-        inStream = new FileInputStream(System.getProperty("user.home") + "/.jTwitch/credentials.ser");
-        oiStream = new ObjectInputStream(inStream);
-
-        Map<String, Object> credentials = (HashMap<String, Object>) oiStream.readObject();
-
-        oiStream.close();
-        inStream.close();
-
-        return credentials;
-    }
-
-    /**
-     * Stores the credential token in a serialized file.
-     *
-     * @param cred map containing credential token.
-     */
-    private void writeSerializable(Map<String, Object> cred) throws IOException {
-        ObjectOutputStream ooStream;
-        FileOutputStream outStream;
-
-        outStream = new FileOutputStream(System.getProperty("user.home") + "/.jTwitch/credentials.ser", false);
-        ooStream = new ObjectOutputStream(outStream);
-
-        ooStream.writeObject(cred);
-        ooStream.close();
-        outStream.close();
     }
 }
