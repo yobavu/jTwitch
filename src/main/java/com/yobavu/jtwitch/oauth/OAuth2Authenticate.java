@@ -115,7 +115,7 @@ public class OAuth2Authenticate {
      * Loads the access token for an existing user from the serialized file.
      *
      * @param id the unique id associated with an access token.
-     * @return the credential token for making api to Twitch API.
+     * @return the credential token for making requests to Twitch API.
      */
     private TwitchToken loadCredential(String id) throws ClassNotFoundException, IOException {
         File dir = new File(System.getProperty("user.home") + "/.jTwitch/");
