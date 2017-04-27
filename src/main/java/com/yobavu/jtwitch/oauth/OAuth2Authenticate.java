@@ -12,13 +12,7 @@ import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -67,8 +61,8 @@ public class OAuth2Authenticate {
      * @return the credential token for making requests to Twitch API.
      */
     public TwitchToken authenticate(String userId) throws OAuthSystemException, OAuthProblemException, ClassNotFoundException, IOException {
-        if (userId == null) {
-            throw new IllegalArgumentException("Authorization code must not be null");
+        if (userId == null || userId.equals("")) {
+            throw new IllegalArgumentException("Unique user identification code must not be null or empty string");
         }
 
         TwitchToken credential = TwitchUtil.loadCredential(userId);

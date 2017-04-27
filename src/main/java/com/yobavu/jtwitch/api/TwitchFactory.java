@@ -44,6 +44,9 @@ public final class TwitchFactory {
             return this;
         }
 
+        /**
+         * Application interceptor is used for adding request headers to each response.
+         */
         public TwitchFactory build() {
             clientBuilder.addInterceptor(new Interceptor() {
                 @Override

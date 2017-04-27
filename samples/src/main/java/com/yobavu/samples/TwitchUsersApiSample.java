@@ -47,7 +47,7 @@ public class TwitchUsersApiSample {
         getUserByUsername(usersApi);
 
         // check if user is subscribed to a channel
-        userSubscription2Channel(usersApi, Integer.parseInt(userId));
+        userSubscriptionToChannel(usersApi, Integer.parseInt(userId));
 
         // get list of channels followed by user
         channelsFollowed(usersApi, Integer.parseInt(userId));
@@ -60,16 +60,17 @@ public class TwitchUsersApiSample {
         for (User u : userList.getUsers()) {
             System.out.println("User id: " + u.getId());
             System.out.println("Display name: " + u.getDisplayName());
-            System.out.println("User email: " + u.getEmail());
-            System.out.println("Created at: " + u.getCreatedAt());
+            System.out.println("User name: " + u.getName());
+            System.out.println("Account type: " + u.getType());
         }
     }
 
-    public static void userSubscription2Channel(TwitchUsersApi usersApi, int userId) throws IOException {
+    public static void userSubscriptionToChannel(TwitchUsersApi usersApi, int userId) throws IOException {
         try {
             // exception will occur if not subscribed
             UserSubscription uSub = usersApi.getUserChannelSubscription(userId, 5690948);
             System.out.println("Subscribed date: " + uSub.getCreatedAt());
+            System.out.println("Subscribed channel name: " + uSub.getChannel().getName());
         } catch (TwitchApiException e) {
             System.err.println(e.getMessage());
         }
