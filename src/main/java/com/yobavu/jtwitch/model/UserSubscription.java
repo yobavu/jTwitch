@@ -11,7 +11,13 @@ import com.google.gson.annotations.SerializedName;
  */
 public class UserSubscription {
     @SerializedName("_id")
-    private int id;
+    private String id;
+
+    @SerializedName("sub_plan")
+    private String subPlan;
+
+    @SerializedName("sub_plan_name")
+    private String subPlanName;
 
     @SerializedName("channel")
     private Channel channel;
@@ -22,8 +28,22 @@ public class UserSubscription {
     /**
      * Gets subscription id.
      */
-    public int getId() {
+    public String getId() {
         return id;
+    }
+
+    /**
+     * Gets the sub plan.
+     */
+    public String getSubPlan() {
+        return subPlan;
+    }
+
+    /**
+     * Gets the sub plan name.
+     */
+    public String getSubPlanName() {
+        return subPlanName;
     }
 
     /**

@@ -83,7 +83,7 @@ public class TwitchUsersApiSample {
 
         StringBuilder sb = new StringBuilder();
 
-        for (UserFollows.Follows f : userFollows.getFollows()) {
+        for (UserFollow f : userFollows.getFollows()) {
             sb.append("Channel '").append(f.getChannel().getDisplayName())
                     .append("' which has ").append(f.getChannel().getFollowers()).append(" followers!\n");
         }

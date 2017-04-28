@@ -6,32 +6,31 @@ package com.yobavu.jtwitch.api;
 
 import com.yobavu.jtwitch.model.Channel;
 import com.yobavu.jtwitch.model.User;
+import com.yobavu.jtwitch.model.UserFollow;
 import com.yobavu.jtwitch.model.UserFollows;
 import com.yobavu.jtwitch.model.UserList;
-
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
+import com.yobavu.jtwitch.model.UserSubscription;
 
-import com.yobavu.jtwitch.oauth.TwitchToken;
-import com.yobavu.jtwitch.util.TwitchUtil;
+import com.google.gson.Gson;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
+import retrofit2.Response;
 
-import java.io.FileInputStream;
-import java.util.Properties;
+import java.util.List;
 
 public class TwitchUsersApiTest {
-    private Properties prop;
-    private TwitchFactory factory;
+    private Gson gson;
     private TwitchUsersApi usersApi;
 
-    private String clientId;
-    private int twitchUserId;
-    private TwitchToken token;
-
+    private static final int USER_ID = 1111111;
+    private static final int CHANNEL_SUBSCRIBED = 19571752;
+    private static final int CHANNEL_FOLLOWED = 12826;
     private static final int CHANNEL_NOT_SUBSCRIBED = 5690948;
     private static final int CHANNEL_NOT_FOLLOWED = 44445592;
 
@@ -39,62 +38,220 @@ public class TwitchUsersApiTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Before
-    public void setup() throws Exception {
-        prop = new Properties();
-        prop.load(new FileInputStream("src/test/resources/jtwitch.properties"));
-
-        clientId = prop.getProperty("twitch.clientId");
-        twitchUserId = Integer.parseInt(prop.getProperty("twitch.userId"));
-        token = TwitchUtil.loadCredential("sampleUse");
-
-        factory = new TwitchFactory.Builder()
-                .setClientId(clientId)
-                .setAccessToken(token.getAccessToken())
-                .build();
-
-        usersApi = (TwitchUsersApi) factory.getInstance(TwitchFactory.API.Users);
+    public void setup() {
+        gson = new Gson();
+        usersApi = Mockito.mock(TwitchUsersApi.class);
     }
 
     @Test
-    public void testReturnCorrectInstance() {
-        Assert.assertThat(factory.getInstance(TwitchFactory.API.Users), IsInstanceOf.instanceOf(TwitchUsersApi.class));
-    }
+    public void testGetUserByUsername() throws Exception {
+        final String json = "{" +
+                "\"_total\": 1," +
+                "\"users\": [" +
+                "       {" +
+                "           \"_id\": 1," +
+                "           \"bio\": \"Just a gamer playing games and chatting.\"," +
+                "           \"created_at\": \"2013-06-03T19:12:02Z\"," +
+                "           \"display_name\": \"tester\"," +
+                "           \"name\": \"tester\"," +
+                "           \"type\": \"staff\"" +
+                "       }" +
+                " ]" +
+                "}";
+        Response<UserList> response = Response.success(gson.fromJson(json, UserList.class));
 
-    @Test
-    public void testGetUser() throws Exception {
-        final UserList userList = usersApi.getUserByUsername("saddummy");
+        Mockito.when(usersApi.getUserByUsername("tester")).thenReturn(response.body());
 
+        final UserList userList = usersApi.getUserByUsername("tester");
         Assert.assertEquals(userList.getUsers().size(), 1);
+        Assert.assertEquals(1, userList.getTotal());
 
         final User user = userList.getUsers().get(0);
-        Assert.assertEquals("saddummy", user.getName());
+        Assert.assertEquals(1, user.getId());
+        Assert.assertEquals("Just a gamer playing games and chatting.", user.getBio());
+        Assert.assertEquals("2013-06-03T19:12:02Z", user.getCreatedAt());
+        Assert.assertEquals("tester", user.getDisplayName());
+        Assert.assertEquals("tester", user.getName());
+        Assert.assertEquals("staff", user.getType());
+
+    }
+
+    @Test
+    public void testGetUserById() throws Exception {
+        final String json = "{" +
+                    "\"_id\": 1111111," +
+                    "\"bio\": \"Just a gamer playing games and chatting.\"," +
+                    "\"created_at\": \"2013-06-03T19:12:02Z\"," +
+                    "\"display_name\": \"tester_display\"," +
+                    "\"name\": \"tester\"," +
+                    "\"type\": \"user\"" +
+                "}";
+
+        Response<User> response = Response.success(gson.fromJson(json, User.class));
+
+        Mockito.when(usersApi.getUserById(USER_ID)).thenReturn(response.body());
+
+        final User user = usersApi.getUserById(USER_ID);
+        Assert.assertEquals(USER_ID, user.getId());
+        Assert.assertEquals("Just a gamer playing games and chatting.", user.getBio());
+        Assert.assertEquals("2013-06-03T19:12:02Z", user.getCreatedAt());
+        Assert.assertEquals("tester_display", user.getDisplayName());
+        Assert.assertEquals("tester", user.getName());
         Assert.assertEquals("user", user.getType());
     }
 
     @Test
-    public void testNotSubscribedException() throws Exception {
+    public void testUserSubscriptionException() throws Exception {
         exception.expect(TwitchApiException.class);
         exception.expectMessage("has no subscriptions to");
 
-        usersApi.getUserChannelSubscription(twitchUserId, CHANNEL_NOT_SUBSCRIBED);
+        Mockito.when(usersApi.getUserChannelSubscription(USER_ID, CHANNEL_NOT_SUBSCRIBED))
+                .thenThrow(new TwitchApiException("tester has no subscriptions to twitch"));
+
+        usersApi.getUserChannelSubscription(USER_ID, CHANNEL_NOT_SUBSCRIBED);
     }
 
     @Test
-    public void testChannelsFollowed() throws Exception {
-        final UserFollows userFollows = usersApi.getChannelsFollowedByUser(twitchUserId);
+    public void testUserSubscription() throws Exception {
+        final String json = "{" +
+                "    \"_id\": \"ac2f1248993eaf97e71721458bd88aae66c92330\"," +
+                "    \"sub_plan\": \"3000\"," +
+                "    \"sub_plan_name\": \"Channel Subscription (forstycup) - $24.99 Sub\"," +
+                "    \"channel\": {" +
+                "        \"_id\": \"19571752\"," +
+                "        \"broadcaster_language\": \"en\"," +
+                "        \"created_at\": \"2011-01-16T04:35:51Z\"," +
+                "        \"display_name\": \"forstycup\"," +
+                "        \"followers\": 397," +
+                "        \"game\": \"Final Fantasy XV\"," +
+                "        \"language\": \"en\"," +
+                "        \"logo\": \"https://static-cdn.jtvnw.net/jtv_user_pictures/forstycup-profile_image-940fb4ca1e5949c0-300x300.png\"," +
+                "        \"mature\": true," +
+                "        \"name\": \"forstycup\"," +
+                "        \"partner\": true," +
+                "        \"profile_banner\": null," +
+                "        \"profile_banner_background_color\": null," +
+                "        \"status\": \"[Blind] Moar Sidequests! Let's explore.\"," +
+                "        \"updated_at\": \"2017-04-06T09:00:41Z\"," +
+                "        \"url\": \"http://localhost:3000/forstycup\"," +
+                "        \"video_banner\": \"https://static-cdn.jtvnw.net/jtv_user_pictures/forstycup-channel_offline_image-f7274322063da225-1920x1080.png\"," +
+                "        \"views\": 5705" +
+                "    }," +
+                "    \"created_at\": \"2017-04-08T19:54:24Z\"" +
+                "}";
 
-        Assert.assertEquals(userFollows.getFollows().size(), 2);
+        Response<UserSubscription> response = Response.success(gson.fromJson(json, UserSubscription.class));
 
-        final Channel channel = userFollows.getFollows().get(0).getChannel();
-        Assert.assertEquals("zeenigami", channel.getName());
-        Assert.assertEquals(24078, channel.getFollowers());
+        Mockito.when(usersApi.getUserChannelSubscription(USER_ID, CHANNEL_SUBSCRIBED)).thenReturn(response.body());
+
+        final UserSubscription subscription = usersApi.getUserChannelSubscription(USER_ID, CHANNEL_SUBSCRIBED);
+        Assert.assertEquals("ac2f1248993eaf97e71721458bd88aae66c92330", subscription.getId());
+        Assert.assertThat(subscription.getChannel(), IsInstanceOf.instanceOf(Channel.class));
+
+        final Channel channel = subscription.getChannel();
+        Assert.assertEquals(19571752, channel.getId());
+        Assert.assertEquals("en", channel.getBroadcasterLanguage());
+        Assert.assertEquals("2011-01-16T04:35:51Z", channel.getCreatedAt());
+        Assert.assertEquals("forstycup", channel.getDisplayName());
+        Assert.assertEquals(397, channel.getFollowers());
+        Assert.assertEquals("Final Fantasy XV", channel.getGame());
+        Assert.assertTrue(channel.isPartner());
     }
 
     @Test
-    public void testChannelFollowedByUserException() throws Exception {
+    public void testChannelsFollowedByUser() throws Exception {
+        final String json = "{" +
+                "   \"_total\": 2," +
+                "   \"follows\": [" +
+                "      {" +
+                "         \"created_at\": \"2016-09-16T20:37:39Z\"," +
+                "         \"notifications\": false," +
+                "         \"channel\": {" +
+                "            \"_id\": 12826," +
+                "            \"background\": null," +
+                "            \"banner\": null," +
+                "            \"broadcaster_language\": \"en\"," +
+                "            \"created_at\": \"2007-05-22T10:39:54Z\"," +
+                "            \"delay\": null," +
+                "            \"display_name\": \"Twitch\"," +
+                "            \"followers\": 530641," +
+                "            \"game\": \"Gaming Talk Shows\"," +
+                "            \"language\": \"en\"," +
+                "            \"logo\": \"https://static-cdn.jtvnw.net/jtv_user_pictures/twitch-profile_image-bd6df6672afc7497-300x300.png\"," +
+                "            \"mature\": false," +
+                "            \"name\": \"twitch\"," +
+                "            \"partner\": true," +
+                "            \"profile_banner\": \"https://static-cdn.jtvnw.net/jtv_user_pictures/twitch-profile_banner-6936c61353e4aeed-480.png\"," +
+                "            \"profile_banner_background_color\": null," +
+                "            \"status\": \"Twitch Weekly\"," +
+                "            \"updated_at\": \"2016-12-13T18:35:28Z\"," +
+                "            \"url\": \"https://www.twitch.tv/twitch\"," +
+                "            \"video_banner\": \"https://static-cdn.jtvnw.net/jtv_user_pictures/twitch-channel_offline_image-d687d9e22677a1b6-640x360.png\"," +
+                "            \"views\": 109064987" +
+                "         }" +
+                "      }," +
+                "      {" +
+                "         \"created_at\": \"2016-10-11T20:37:39Z\"," +
+                "         \"notifications\": true," +
+                "         \"channel\": {" +
+                "            \"_id\": 13826," +
+                "            \"background\": null," +
+                "            \"banner\": null," +
+                "            \"broadcaster_language\": \"ko\"," +
+                "            \"created_at\": \"2008-05-02T10:39:54Z\"," +
+                "            \"delay\": null," +
+                "            \"display_name\": \"Another_Twitch\"," +
+                "            \"followers\": 641," +
+                "            \"game\": \"Gaming Talk Shows\"," +
+                "            \"language\": \"ko\"," +
+                "            \"logo\": null," +
+                "            \"mature\": false," +
+                "            \"name\": \"another_twitch\"," +
+                "            \"partner\": false," +
+                "            \"profile_banner\": null," +
+                "            \"profile_banner_background_color\": null," +
+                "            \"status\": \"Twitch Weekly\"," +
+                "            \"updated_at\": \"2016-12-13T18:35:28Z\"," +
+                "            \"url\": \"https://www.twitch.tv/twitch\"," +
+                "            \"video_banner\": null," +
+                "            \"views\": 164987" +
+                "         }" +
+                "      }" +
+                "   ]" +
+                "}";
+
+        Response<UserFollows> response = Response.success(gson.fromJson(json, UserFollows.class));
+
+        Mockito.when(usersApi.getChannelsFollowedByUser(USER_ID)).thenReturn(response.body());
+
+        final UserFollows follows = usersApi.getChannelsFollowedByUser(USER_ID);
+        Assert.assertEquals(2, follows.getTotal());
+
+        final List<UserFollow> followList = follows.getFollows();
+        Assert.assertEquals(2, followList.size());
+
+        final UserFollow follow1 = followList.get(0);
+        Assert.assertEquals("2016-09-16T20:37:39Z", follow1.getCreatedAt());
+        Assert.assertFalse(follow1.getNotifications());
+        Assert.assertThat(follow1.getChannel(), IsInstanceOf.instanceOf(Channel.class));
+
+        final Channel channel1 = follow1.getChannel();
+        Assert.assertEquals(12826, channel1.getId());
+        Assert.assertEquals("en", channel1.getBroadcasterLanguage());
+        Assert.assertEquals("2007-05-22T10:39:54Z", channel1.getCreatedAt());
+
+        final UserFollow follow2 = followList.get(1);
+        final Channel channel2 = follow2.getChannel();
+        Assert.assertNotEquals(channel1.getId(), channel2.getId());
+    }
+
+    @Test
+    public void testCheckUserFollowsChannel() throws Exception {
         exception.expect(TwitchApiException.class);
         exception.expectMessage("Follow not found");
 
-        usersApi.getChannelFollowedByUser(twitchUserId, CHANNEL_NOT_FOLLOWED);
+        Mockito.when(usersApi.checkUserFollowsChannel(USER_ID, CHANNEL_NOT_FOLLOWED)).thenThrow(new TwitchApiException("Follow not found"));
+
+        usersApi.checkUserFollowsChannel(USER_ID, CHANNEL_NOT_FOLLOWED);
     }
 }

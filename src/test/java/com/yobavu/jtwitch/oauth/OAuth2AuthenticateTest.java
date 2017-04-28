@@ -10,41 +10,34 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import java.io.FileInputStream;
-import java.util.Properties;
-
 public class OAuth2AuthenticateTest {
-    private Properties prop;
     private OAuth2Authenticate oaa;
-
-    private String redirectUri;
-    private String clientId;
-    private String clientSecret;
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
     @Before
-    public void setup() throws Exception {
-        prop = new Properties();
-        prop.load(new FileInputStream("src/test/resources/jtwitch.properties"));
-
-        redirectUri = "http://localhost/";
-        clientId = prop.getProperty("twitch.clientId");
-        clientSecret = prop.getProperty("twitch.clientSecret");
-
-        oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
+    public void setup() {
+        oaa = Mockito.mock(OAuth2Authenticate.class);
     }
 
     @Test
-    public void shouldThrowIllegalArgumentExceptionWhenUserIdIsNull() throws Exception {
+    public void testNullUserIdException() throws Exception {
         exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Unique user identification code must not be null or empty string");
+
+        Mockito.when(oaa.authenticate(null))
+                .thenThrow(new IllegalArgumentException("Unique user identification code must not be null or empty string"));
         oaa.authenticate(null);
     }
 
     @Test
-    public void shouldThrowIllegalArgumentExceptionWhenUserIdIsEmptyString() throws Exception {
+    public void testEmptyStringUserIdException() throws Exception {
         exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Unique user identification code must not be null or empty string");
+
+        Mockito.when(oaa.authenticate(""))
+                .thenThrow(new IllegalArgumentException("Unique user identification code must not be null or empty string"));
         oaa.authenticate("");
     }
 }

@@ -157,22 +157,29 @@ public class TwitchUsersApi {
         String direction = null;
         String sortby = null;
 
-        if (queryParams.length > 0) {
-            if (queryParams[0] != null) {
+        if (queryParams.length > 4) {
+            throw new IllegalArgumentException("Invalid number of optional parameters");
+        }
+
+        switch (queryParams.length) {
+            case 1:
                 limit = (Integer) queryParams[0];
-            }
-
-            if (queryParams[1] != null) {
+                break;
+            case 2:
+                limit = (Integer) queryParams[0];
                 offset = (Integer) queryParams[1];
-            }
-
-            if (queryParams[2] != null) {
+                break;
+            case 3:
+                limit = (Integer) queryParams[0];
+                offset = (Integer) queryParams[1];
                 direction = (String) queryParams[2];
-            }
-
-            if (queryParams[3] != null) {
+                break;
+            case 4:
+                limit = (Integer) queryParams[0];
+                offset = (Integer) queryParams[1];
+                direction = (String) queryParams[2];
                 sortby = (String) queryParams[3];
-            }
+                break;
         }
 
         Call<UserFollows> call = userService.getChannelsFollowedByUser(userId, limit, offset, direction, sortby);
@@ -193,7 +200,7 @@ public class TwitchUsersApi {
      * @param userId the id for specific user account.
      * @param channelId the id for specific channel.
      */
-    public UserFollow getChannelFollowedByUser(int userId, int channelId) throws IOException, TwitchApiException {
+    public UserFollow checkUserFollowsChannel(int userId, int channelId) throws IOException, TwitchApiException {
         Call<UserFollow> call = userService.getChannelFollowedByUser(userId, channelId);
 
         Response<UserFollow> response = call.execute();
