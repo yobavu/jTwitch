@@ -22,7 +22,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-
 import java.util.List;
 
 /**
@@ -31,7 +30,6 @@ import java.util.List;
 public class TwitchUsersApi {
     private final String API_URL = "https://api.twitch.tv/kraken/";
 
-//    private Retrofit retrofit;
     private UserService userService;
 
     public TwitchUsersApi(OkHttpClient.Builder clientBuilder) {
@@ -68,7 +66,7 @@ public class TwitchUsersApi {
      * @param username the username for specific user account.
      */
     public UserList getUserByUsername(String username) throws IOException, TwitchApiException {
-        Call<UserList> call = userService.getUserByName(username);
+        Call<UserList> call = userService.getUserByUsername(username);
 
         Response<UserList> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -198,10 +196,10 @@ public class TwitchUsersApi {
      * Check if user follows a specific channel. Will return null if user is not following channel.
      *
      * @param userId the id for specific user account.
-     * @param channelId the id for specific channel.
+     * @param channelId the id of channel to check.
      */
     public UserFollow checkUserFollowsChannel(int userId, int channelId) throws IOException, TwitchApiException {
-        Call<UserFollow> call = userService.getChannelFollowedByUser(userId, channelId);
+        Call<UserFollow> call = userService.checkUserFollowsChannel(userId, channelId);
 
         Response<UserFollow> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
@@ -217,7 +215,7 @@ public class TwitchUsersApi {
      * Add user as a follower for a specific channel.
      *
      * @param userId the id for specific user account.
-     * @param channelId the id for specific channel.
+     * @param channelId the id for specific channel to follow.
      */
     public UserFollow followChannel(int userId, int channelId) throws IOException, TwitchApiException {
         Call<UserFollow> call = userService.followChannel(userId, channelId);

@@ -30,7 +30,7 @@ public class TwitchUsersApiTest {
 
     private static final int USER_ID = 1111111;
     private static final int CHANNEL_SUBSCRIBED = 19571752;
-    private static final int CHANNEL_FOLLOWED = 12826;
+    private static final int CHANNEL_TO_FOLLOW = 129454141;
     private static final int CHANNEL_NOT_SUBSCRIBED = 5690948;
     private static final int CHANNEL_NOT_FOLLOWED = 44445592;
 
@@ -253,5 +253,44 @@ public class TwitchUsersApiTest {
         Mockito.when(usersApi.checkUserFollowsChannel(USER_ID, CHANNEL_NOT_FOLLOWED)).thenThrow(new TwitchApiException("Follow not found"));
 
         usersApi.checkUserFollowsChannel(USER_ID, CHANNEL_NOT_FOLLOWED);
+    }
+
+    @Test
+    public void testFollowChannel() throws Exception {
+        final String json = "{" +
+                "   \"channel\": {" +
+                "      \"_id\": 129454141," +
+                "      \"broadcaster_language\": null," +
+                "      \"created_at\": \"2016-07-13T14:40:42Z\"," +
+                "      \"display_name\": \"dallasnchains\"," +
+                "      \"followers\": 2," +
+                "      \"game\": null," +
+                "      \"language\": \"en\"," +
+                "      \"logo\": null," +
+                "      \"mature\": null," +
+                "      \"name\": \"dallasnchains\"," +
+                "      \"partner\": false," +
+                "      \"profile_banner\": null," +
+                "      \"profile_banner_background_color\": null," +
+                "      \"status\": null," +
+                "      \"updated_at\": \"2016-12-14T00:32:17Z\"," +
+                "      \"url\": \"https://www.twitch.tv/dallasnchains\"," +
+                "      \"video_banner\": null," +
+                "      \"views\": 6" +
+                "   }," +
+                "   \"created_at\": \"2016-12-14T10:28:32-08:00\"," +
+                "   \"notifications\": false" +
+                "}";
+
+        Response<UserFollow> response = Response.success(gson.fromJson(json, UserFollow.class));
+
+        Mockito.when(usersApi.followChannel(USER_ID, CHANNEL_TO_FOLLOW)).thenReturn(response.body());
+
+        final UserFollow follow = usersApi.followChannel(USER_ID, CHANNEL_TO_FOLLOW);
+        Assert.assertEquals("2016-12-14T10:28:32-08:00", follow.getCreatedAt());
+        Assert.assertFalse(follow.getNotifications());
+
+        final Channel channel = follow.getChannel();
+        Assert.assertEquals(CHANNEL_TO_FOLLOW, channel.getId());
     }
 }

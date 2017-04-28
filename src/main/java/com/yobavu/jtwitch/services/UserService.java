@@ -39,7 +39,7 @@ public interface UserService {
      * @param username the username for specific user account.
      */
     @GET("users")
-    Call<UserList> getUserByName(@Query("login") String username);
+    Call<UserList> getUserByUsername(@Query("login") String username);
 
     /**
      * Gets a specific user account by id.
@@ -99,7 +99,7 @@ public interface UserService {
      * @param channelId the id for specific channel.
      */
     @GET("users/{userId}/follows/channels/{channelId}")
-    Call<UserFollow> getChannelFollowedByUser(@Path("userId") int userId, @Path("channelId") int channelId);
+    Call<UserFollow> checkUserFollowsChannel(@Path("userId") int userId, @Path("channelId") int channelId);
 
     /**
      * Add user as a follower for a specific channel.
