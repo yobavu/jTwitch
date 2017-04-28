@@ -30,7 +30,7 @@ public class TwitchUsersApiSample {
         final String redirectUri = "http://localhost/";
         final String clientId = prop.getProperty("twitch.clientId");
         final String clientSecret = prop.getProperty("twitch.clientSecret");
-        final String userId = prop.getProperty("twitch.userId");
+        final String twitchUserId = prop.getProperty("twitch.userId");
 
         OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
 
@@ -47,10 +47,10 @@ public class TwitchUsersApiSample {
         getUserByUsername(usersApi);
 
         // check if user is subscribed to a channel
-        userSubscriptionToChannel(usersApi, Integer.parseInt(userId));
+        userSubscriptionToChannel(usersApi, Integer.parseInt(twitchUserId));
 
         // get list of channels followed by user
-        channelsFollowed(usersApi, Integer.parseInt(userId));
+        channelsFollowed(usersApi, Integer.parseInt(twitchUserId));
     }
 
     public static void getUserByUsername(TwitchUsersApi usersApi) throws Exception {

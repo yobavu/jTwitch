@@ -4,17 +4,21 @@
 
 package com.yobavu.jtwitch.api;
 
+import com.yobavu.jtwitch.model.Channel;
 import com.yobavu.jtwitch.model.User;
+import com.yobavu.jtwitch.model.UserFollows;
 import com.yobavu.jtwitch.model.UserList;
 
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 
+import com.yobavu.jtwitch.oauth.TwitchToken;
+import com.yobavu.jtwitch.util.TwitchUtil;
 import org.hamcrest.core.IsInstanceOf;
-import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.rules.ExpectedException;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -24,61 +28,73 @@ public class TwitchUsersApiTest {
     private TwitchFactory factory;
     private TwitchUsersApi usersApi;
 
-    private UserList userList;
+    private String clientId;
+    private int twitchUserId;
+    private TwitchToken token;
 
-    private int userId;
+    private static final int CHANNEL_NOT_SUBSCRIBED = 5690948;
+    private static final int CHANNEL_NOT_FOLLOWED = 44445592;
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setup() throws Exception {
         prop = new Properties();
         prop.load(new FileInputStream("src/test/resources/jtwitch.properties"));
 
-        userId = Integer.parseInt(prop.getProperty("twitch.userId"));
+        clientId = prop.getProperty("twitch.clientId");
+        twitchUserId = Integer.parseInt(prop.getProperty("twitch.userId"));
+        token = TwitchUtil.loadCredential("sampleUse");
 
         factory = new TwitchFactory.Builder()
-                .setClientId("id")
-                .setAccessToken("token")
+                .setClientId(clientId)
+                .setAccessToken(token.getAccessToken())
                 .build();
 
-        usersApi = Mockito.mock(TwitchUsersApi.class);
-        userList = Mockito.mock(UserList.class);
+        usersApi = (TwitchUsersApi) factory.getInstance(TwitchFactory.API.Users);
     }
 
     @Test
-    public void shouldReturnInstanceOfTwitchUsersApi() {
+    public void testReturnCorrectInstance() {
         Assert.assertThat(factory.getInstance(TwitchFactory.API.Users), IsInstanceOf.instanceOf(TwitchUsersApi.class));
     }
 
     @Test
-    public void shouldReturnUserByUsername() throws Exception {
-        Mockito.when(usersApi.getUserByUsername("tester")).thenReturn(userList);
-        Assert.assertThat(usersApi.getUserByUsername("tester"), IsInstanceOf.instanceOf(UserList.class));
+    public void testGetUser() throws Exception {
+        final UserList userList = usersApi.getUserByUsername("saddummy");
+
+        Assert.assertEquals(userList.getUsers().size(), 1);
+
+        final User user = userList.getUsers().get(0);
+        Assert.assertEquals("saddummy", user.getName());
+        Assert.assertEquals("user", user.getType());
     }
 
     @Test
-    public void shouldReturnCorrectUserInfo() throws Exception {
-        Mockito.when(usersApi.getUserByUsername("saddummy")).thenReturn(userList);
+    public void testNotSubscribedException() throws Exception {
+        exception.expect(TwitchApiException.class);
+        exception.expectMessage("has no subscriptions to");
 
-        UserList userList = usersApi.getUserByUsername("saddummy");
-
-        for (User u : userList.getUsers()) {
-            Assert.assertEquals(u.getName(), "saddummy");
-            Assert.assertEquals(u.getType(), "user");
-        }
-    }
-
-    @Test (expected = TwitchApiException.class)
-    public void shouldThrowTwitchApiExceptionIfAccountNotSubscribed() throws Exception {
-        Mockito.when(usersApi.getUserChannelSubscription(userId, 5690948)).thenThrow(TwitchApiException.class);
-        usersApi.getUserChannelSubscription(userId, 5690948);
+        usersApi.getUserChannelSubscription(twitchUserId, CHANNEL_NOT_SUBSCRIBED);
     }
 
     @Test
-    public void shouldReturnNotSubscribedMessage() throws Exception {
-        try {
-            usersApi.getUserChannelSubscription(userId, 5690948);
-        } catch (TwitchApiException e) {
-            Assert.assertThat(e.getMessage(), StringContains.containsString("has no subscriptions to"));
-        }
+    public void testChannelsFollowed() throws Exception {
+        final UserFollows userFollows = usersApi.getChannelsFollowedByUser(twitchUserId);
+
+        Assert.assertEquals(userFollows.getFollows().size(), 2);
+
+        final Channel channel = userFollows.getFollows().get(0).getChannel();
+        Assert.assertEquals("zeenigami", channel.getName());
+        Assert.assertEquals(24078, channel.getFollowers());
+    }
+
+    @Test
+    public void testChannelFollowedByUserException() throws Exception {
+        exception.expect(TwitchApiException.class);
+        exception.expectMessage("Follow not found");
+
+        usersApi.getChannelFollowedByUser(twitchUserId, CHANNEL_NOT_FOLLOWED);
     }
 }
