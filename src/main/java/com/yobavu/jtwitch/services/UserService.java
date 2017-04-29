@@ -5,6 +5,8 @@
 package com.yobavu.jtwitch.services;
 
 import com.yobavu.jtwitch.model.User;
+import com.yobavu.jtwitch.model.UserBlock;
+import com.yobavu.jtwitch.model.UserBlockList;
 import com.yobavu.jtwitch.model.UserEmoticon;
 import com.yobavu.jtwitch.model.UserFollow;
 import com.yobavu.jtwitch.model.UserFollowList;
@@ -22,6 +24,7 @@ import java.util.List;
 
 /**
  * Represents the Twitch user API.
+ * @// TODO: Implement wraps for Viewer Heartbeat Service
  */
 public interface UserService {
     /**
@@ -122,4 +125,41 @@ public interface UserService {
      */
     @DELETE("users/{userId}/follows/channels/{channelId}")
     Call<Void> unfollowChannel(@Path("userId") int userId, @Path("channelId") int channelId);
+
+    /**
+     * Gets a user's block list. List is sorted by recency; newest first.
+     *
+     * Requires "user_blocks_read" scope.
+     *
+     * @param userId the id of specific user account.
+     * @param limit optional parameter - sets limit of results.
+     *              Default: 25.
+     *              Max: 100.
+     * @param offset optional parameter - use for pagination of results.
+     *               Default: 0.
+     */
+    @GET("users/{userId}/blocks")
+    Call<UserBlockList> getUserBlockList(@Path("userId") int userId, @Query("limit") Integer limit, @Query("offset") Integer offset);
+
+    /**
+     * Blocks a user; blocked user will be added to specific user's block list.
+     *
+     * Requires "user_blocks_edit" scope.
+     *
+     * @param userId the id of specific user account.
+     * @param blockId the id of account to block.
+     */
+    @PUT("users/{userId}/blocks/{blockId}")
+    Call<UserBlock> blockUser(@Path("userId") int userId, @Path("blockId") int blockId);
+
+    /**
+     * Unblocks a user; user will be removed from specific user's block list.
+     *
+     * Requires "user_blocks_edit" scope.
+     *
+     * @param userId the id of specific user account.
+     * @param unblockId the id of account to unblock.
+     */
+    @DELETE("users/{userId}/blocks/{unblockId}")
+    Call<Void> unblockUser(@Path("userId") int userId, @Path("unblockId") int unblockId);
 }

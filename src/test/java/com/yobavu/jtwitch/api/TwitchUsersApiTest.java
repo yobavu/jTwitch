@@ -35,6 +35,7 @@ public class TwitchUsersApiTest {
     private static final int CHANNEL_TO_FOLLOW = 129454141;
     private static final int CHANNEL_NOT_SUBSCRIBED = 5690948;
     private static final int CHANNEL_NOT_FOLLOWED = 44445592;
+    private static final int USER_TO_BLOCK = 34105628;
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -332,5 +333,33 @@ public class TwitchUsersApiTest {
         final User blockedUser = blocked.getBlockedUser();
         Assert.assertEquals(129454141, blockedUser.getId());
         Assert.assertEquals("dallasnchains", blockedUser.getDisplayName());
+    }
+
+    @Test
+    public void testBlockUser() throws Exception {
+        final String json = "{" +
+                "   \"_id\": 34105628," +
+                "   \"updated_at\": \"2016-12-15T18:57:08Z\"," +
+                "   \"user\": {" +
+                "      \"_id\": 129454141," +
+                "      \"bio\": null," +
+                "      \"created_at\": \"2016-07-13T14:40:42Z\"," +
+                "      \"display_name\": \"dallasnchains\"," +
+                "      \"logo\": null," +
+                "      \"name\": \"dallasnchains\"," +
+                "      \"type\": \"user\"," +
+                "      \"updated_at\": \"2016-12-14T00:32:17Z\"" +
+                "   }" +
+                "}";
+
+        Response<UserBlock> response = Response.success(gson.fromJson(json, UserBlock.class));
+
+        Mockito.when(usersApi.blockUser(USER_ID, USER_TO_BLOCK)).thenReturn(response.body());
+
+        final UserBlock userBlock = usersApi.blockUser(USER_ID, USER_TO_BLOCK);
+        Assert.assertEquals(34105628, userBlock.getId());
+
+        final User blockedUser = userBlock.getBlockedUser();
+        Assert.assertEquals(129454141, blockedUser.getId());
     }
 }
