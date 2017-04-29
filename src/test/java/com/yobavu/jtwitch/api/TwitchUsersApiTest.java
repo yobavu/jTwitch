@@ -6,8 +6,10 @@ package com.yobavu.jtwitch.api;
 
 import com.yobavu.jtwitch.model.Channel;
 import com.yobavu.jtwitch.model.User;
+import com.yobavu.jtwitch.model.UserBlock;
+import com.yobavu.jtwitch.model.UserBlockList;
 import com.yobavu.jtwitch.model.UserFollow;
-import com.yobavu.jtwitch.model.UserFollows;
+import com.yobavu.jtwitch.model.UserFollowList;
 import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.UserSubscription;
@@ -220,11 +222,11 @@ public class TwitchUsersApiTest {
                 "   ]" +
                 "}";
 
-        Response<UserFollows> response = Response.success(gson.fromJson(json, UserFollows.class));
+        Response<UserFollowList> response = Response.success(gson.fromJson(json, UserFollowList.class));
 
         Mockito.when(usersApi.getChannelsFollowedByUser(USER_ID)).thenReturn(response.body());
 
-        final UserFollows follows = usersApi.getChannelsFollowedByUser(USER_ID);
+        final UserFollowList follows = usersApi.getChannelsFollowedByUser(USER_ID);
         Assert.assertEquals(2, follows.getTotal());
 
         final List<UserFollow> followList = follows.getFollows();
@@ -292,5 +294,43 @@ public class TwitchUsersApiTest {
 
         final Channel channel = follow.getChannel();
         Assert.assertEquals(CHANNEL_TO_FOLLOW, channel.getId());
+    }
+
+    @Test
+    public void testGetUserBlockList() throws Exception {
+        final String json = "{" +
+                "   \"_total\": 1," +
+                "   \"blocks\":" +
+                "   [{" +
+                "      \"_id\": 34105660," +
+                "      \"updated_at\": \"2016-12-15T18:58:11Z\"," +
+                "      \"user\": {" +
+                "         \"_id\": 129454141," +
+                "         \"bio\": null," +
+                "         \"created_at\": \"2016-07-13T14:40:42Z\"," +
+                "         \"display_name\": \"dallasnchains\"," +
+                "         \"logo\": null," +
+                "         \"name\": \"dallasnchains\"," +
+                "         \"type\": \"user\"," +
+                "         \"updated_at\": \"2016-12-14T00:32:17Z\"" +
+                "      }" +
+                "     }" +
+                "   ]" +
+                "}";
+
+        Response<UserBlockList> response = Response.success(gson.fromJson(json, UserBlockList.class));
+
+        Mockito.when(usersApi.getUserBlockList(USER_ID)).thenReturn(response.body());
+
+        final UserBlockList userBlockList = usersApi.getUserBlockList(USER_ID);
+        Assert.assertEquals(1, userBlockList.getTotal());
+        Assert.assertEquals(1, userBlockList.getBlocks().size());
+
+        final UserBlock blocked = userBlockList.getBlocks().get(0);
+        Assert.assertEquals(34105660, blocked.getId());
+
+        final User blockedUser = blocked.getBlockedUser();
+        Assert.assertEquals(129454141, blockedUser.getId());
+        Assert.assertEquals("dallasnchains", blockedUser.getDisplayName());
     }
 }

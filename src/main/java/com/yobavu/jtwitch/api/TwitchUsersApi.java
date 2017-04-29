@@ -10,7 +10,7 @@ import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserEmoticon;
 import com.yobavu.jtwitch.model.UserFollow;
-import com.yobavu.jtwitch.model.UserFollows;
+import com.yobavu.jtwitch.model.UserFollowList;
 import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.services.UserService;
@@ -149,7 +149,7 @@ public class TwitchUsersApi {
      *            </li>
      *        </ul>
      */
-    public UserFollows getChannelsFollowedByUser(int userId, Object... queryParams) throws IOException, TwitchApiException {
+    public UserFollowList getChannelsFollowedByUser(int userId, Object... queryParams) throws IOException, TwitchApiException {
         Integer limit = null;
         Integer offset = null;
         String direction = null;
@@ -180,9 +180,9 @@ public class TwitchUsersApi {
                 break;
         }
 
-        Call<UserFollows> call = userService.getChannelsFollowedByUser(userId, limit, offset, direction, sortby);
+        Call<UserFollowList> call = userService.getChannelsFollowedByUser(userId, limit, offset, direction, sortby);
 
-        Response<UserFollows> response = call.execute();
+        Response<UserFollowList> response = call.execute();
         ApiError apiError = ErrorParser.parseError(response);
 
         if (apiError != null) {
@@ -228,5 +228,19 @@ public class TwitchUsersApi {
         }
 
         return response.body();
+    }
+
+    /**
+     * Deletes a specified user from the followers list of a specified channel.
+     *
+     * Requires "user_follows_edit" scope.
+     *
+     * @param userId the id for specific user account.
+     * @param channelId the id for specific channel.
+     */
+    public void unfollowChannel(int userId, int channelId) throws IOException {
+        Call<Void> call = userService.unfollowChannel(userId, channelId);
+
+        call.execute();
     }
 }

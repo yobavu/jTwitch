@@ -25,7 +25,7 @@ TwitchUsersApi usersApi = (TwitchUsersApi) factory.getInstance(TwitchFactory.API
 Execute a request:
 ```java
 // userId is id of user associated with token - in other words, your Twitch account id
-UserFollows userFollows = usersApi.getChannelsFollowedByUser(userId);
+UserFollowList userFollowList = usersApi.getChannelsFollowedByUser(userId);
 ```
 ## Examples
 There are a few samples in `samples/src/main`.

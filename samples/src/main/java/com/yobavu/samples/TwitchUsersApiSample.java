@@ -8,7 +8,7 @@ import com.yobavu.jtwitch.api.TwitchFactory;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserFollow;
-import com.yobavu.jtwitch.model.UserFollows;
+import com.yobavu.jtwitch.model.UserFollowList;
 import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.oauth.OAuth2Authenticate;
@@ -86,13 +86,13 @@ public class TwitchUsersApiSample {
     }
 
     public static void channelsFollowed(TwitchUsersApi usersApi, int userId) throws TwitchApiException, IOException {
-        UserFollows userFollows = usersApi.getChannelsFollowedByUser(userId);
+        UserFollowList userFollowList = usersApi.getChannelsFollowedByUser(userId);
 
         System.out.println("User is following:");
 
         StringBuilder sb = new StringBuilder();
 
-        for (UserFollow f : userFollows.getFollows()) {
+        for (UserFollow f : userFollowList.getFollows()) {
             sb.append("Channel '").append(f.getChannel().getDisplayName())
                     .append("' which has ")
                     .append(f.getChannel().getFollowers()).append(" followers!\n");

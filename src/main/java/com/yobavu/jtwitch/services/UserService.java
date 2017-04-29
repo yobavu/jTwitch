@@ -7,7 +7,7 @@ package com.yobavu.jtwitch.services;
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserEmoticon;
 import com.yobavu.jtwitch.model.UserFollow;
-import com.yobavu.jtwitch.model.UserFollows;
+import com.yobavu.jtwitch.model.UserFollowList;
 import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
 
@@ -89,8 +89,8 @@ public interface UserService {
      *               Default: created_at.
      */
     @GET("users/{userId}/follows/channels")
-    Call<UserFollows> getChannelsFollowedByUser(@Path("userId") int userId, @Query("limit") Integer limit, @Query("offset") Integer offset,
-                                                @Query("direction") String direction, @Query("sortby") String sortby);
+    Call<UserFollowList> getChannelsFollowedByUser(@Path("userId") int userId, @Query("limit") Integer limit, @Query("offset") Integer offset,
+                                                   @Query("direction") String direction, @Query("sortby") String sortby);
 
     /**
      * Check if user follows a specific channel. Will return null if user is not following channel.
@@ -113,7 +113,7 @@ public interface UserService {
     Call<UserFollow> followChannel(@Path("userId") int userId, @Path("channelId") int channelId);
 
     /**
-     * Deletes a specified user from the followers of a specified channel.
+     * Deletes a specified user from the followers list of a specified channel.
      *
      * Requires "user_follows_edit" scope.
      *
@@ -121,5 +121,5 @@ public interface UserService {
      * @param channelId the id for specific channel.
      */
     @DELETE("users/{userId}/follows/channels/{channelId}")
-    Call<Void> unFollowChannel(@Path("userId") int userId, @Path("channelId") int channelId);
+    Call<Void> unfollowChannel(@Path("userId") int userId, @Path("channelId") int channelId);
 }

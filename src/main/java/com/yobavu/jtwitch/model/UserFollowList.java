@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * List of channels Twitch user follows.
  */
-public class UserFollows {
+public class UserFollowList {
     @SerializedName("_total")
     private int total;
 
