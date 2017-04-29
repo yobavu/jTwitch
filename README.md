@@ -37,6 +37,8 @@ Download
 --------
 The latest JAR is available on the release page.
 
+Or, you can package your own JAR file using maven: `mvn package`.
+
 License
 -------
 See LICENSE file.
