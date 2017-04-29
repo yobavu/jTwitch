@@ -28,7 +28,7 @@ import java.util.List;
  * Wrapper for the Twitch users API.
  */
 public class TwitchUsersApi {
-    private final String API_URL = "https://api.twitch.tv/kraken/";
+    private static final String API_URL = "https://api.twitch.tv/kraken/";
 
     private UserService userService;
 

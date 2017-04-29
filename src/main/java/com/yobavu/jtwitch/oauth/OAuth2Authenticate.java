@@ -4,6 +4,7 @@
 
 package com.yobavu.jtwitch.oauth;
 
+import com.yobavu.jtwitch.util.TwitchScope;
 import com.yobavu.jtwitch.util.TwitchUtil;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
@@ -21,23 +22,27 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Utility for managing and creating OAuth 2.0 authorization.
  */
 public class OAuth2Authenticate {
-    private final String AUTHORIZE_ENDPOINT = "https://api.twitch.tv/kraken/oauth2/authorize";
-    private final String TOKEN_ENDPOINT = "https://api.twitch.tv/kraken/oauth2/token";
-    private final String RESPONSE_TYPE = "code";
-    private final String SCOPES = "user_read user_subscriptions user_follows_edit";   // todo need better way to construct these
+    private static final String AUTHORIZE_ENDPOINT = "https://api.twitch.tv/kraken/oauth2/authorize";
+    private static final String TOKEN_ENDPOINT = "https://api.twitch.tv/kraken/oauth2/token";
+    private static final String RESPONSE_TYPE = "code";
+
+    private String scopes;
 
     private OAuthClient oAuthClient;
     private OAuth2Support oAuthSupport;
 
-    public OAuth2Authenticate(String clientId, String clientSecret, String redirectUri) {
+    public OAuth2Authenticate(String clientId, String clientSecret, String redirectUri, List<TwitchScope.SCOPES> scopes) {
         oAuthClient = new OAuthClient(new URLConnectionClient());
         oAuthSupport = new OAuth2Support(clientId, clientSecret, redirectUri);
+
+        this.scopes = TwitchScope.constructScopes(scopes);
     }
 
     /**
@@ -51,7 +56,7 @@ public class OAuth2Authenticate {
                 .setResponseType(RESPONSE_TYPE)
                 .setClientId(oAuthSupport.getClientId())
                 .setRedirectURI(oAuthSupport.getRedirectUri())
-                .setScope(SCOPES)
+                .setScope(scopes)
                 .buildQueryMessage();
 
         return request.getLocationUri();

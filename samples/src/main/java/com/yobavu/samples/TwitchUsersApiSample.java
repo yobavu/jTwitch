@@ -14,9 +14,12 @@ import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.oauth.OAuth2Authenticate;
 import com.yobavu.jtwitch.oauth.TwitchToken;
 import com.yobavu.jtwitch.api.TwitchUsersApi;
+import com.yobavu.jtwitch.util.TwitchScope;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -33,7 +36,12 @@ public class TwitchUsersApiSample {
         // this is id of user associated with token - in other words, your Twitch account id
         final String twitchUserId = prop.getProperty("twitch.userId");
 
-        OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
+        List<TwitchScope.SCOPES> scopes = new ArrayList<>();
+        scopes.add(TwitchScope.SCOPES.USER_READ);
+        scopes.add(TwitchScope.SCOPES.USER_SUBSCRIPTION);
+        scopes.add(TwitchScope.SCOPES.USER_FOLLOWS_EDIT);
+
+        OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri, scopes);
 
         TwitchToken twitchToken = oaa.authenticate("sampleUse");
         TwitchFactory factory = new TwitchFactory.Builder()

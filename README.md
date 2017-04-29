@@ -8,16 +8,9 @@ Still in the early stages - but what is already implemented should work; checkou
 ## Usage
 Authenticate with OAuth 2 and obtain a token:
 ```java
-Properties prop = new Properties();
-prop.load(new FileInputStream("jtwitch.properties"));
+OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri, scopes);
 
-final String redirectUri = "http://localhost:8000/";
-final String clientId = prop.getProperty("twitch.clientId");
-final String clientSecret = prop.getProperty("twitch.clientSecret");
-
-OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
-
-// sampleUse is key used for storing token
+// sampleUse is key used for serializing and storing token
 TwitchToken twitchToken = oaa.authenticate("sampleUse");
 ```
 Create an API wrapper instance:
