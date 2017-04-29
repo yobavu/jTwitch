@@ -12,10 +12,16 @@ import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
 
+import java.awt.Desktop;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * Utility for managing and creating OAuth 2.0 authorization.
@@ -60,7 +66,7 @@ public class OAuth2Authenticate {
      * @param userId unique value to associate with token.
      * @return the credential token for making requests to Twitch API.
      */
-    public TwitchToken authenticate(String userId) throws OAuthSystemException, OAuthProblemException, ClassNotFoundException, IOException {
+    public TwitchToken authenticate(String userId) throws OAuthSystemException, OAuthProblemException, ClassNotFoundException, IOException, URISyntaxException {
         if (userId == null || userId.equals("")) {
             throw new IllegalArgumentException("Unique user identification code must not be null or empty string");
         }
@@ -77,13 +83,14 @@ public class OAuth2Authenticate {
                 throw new IllegalStateException("Authorization code flow URL must not be null");
             }
 
-            System.out.println("Please open the following URL in your browser and enter the authorization code below when done:");
-            System.out.println("  " + authCodeFlowUrl);
-            System.out.println("Authorization code: ");
+            // opens a browser and directs user to authorize page
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI(authCodeFlowUrl));
+            } else {
+                System.err.println("Please open the following URL in your browser:  " + authCodeFlowUrl);
+            }
 
-            Scanner scan = new Scanner(System.in);
-            String authorizationCode = scan.nextLine();
-            scan.close();
+            String authorizationCode = getAuthorizationCode();
 
             OAuthClientRequest request = OAuthClientRequest
                     .tokenLocation(TOKEN_ENDPOINT)
@@ -104,5 +111,51 @@ public class OAuth2Authenticate {
         }
 
         return credential;
+    }
+
+    /**
+     * Generates a socket connection in order to retrieve the authorization code from Twitch.
+     *
+     * @return authorization code.
+     */
+    private String getAuthorizationCode() throws IOException {
+        String code;
+        ServerSocket socket = new ServerSocket(8000);
+
+        while (true) {
+            final Socket client = socket.accept();
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                String line = reader.readLine();
+
+                if (line == null) {
+                    throw new IOException("Client closed connection");
+                }
+
+                // strip out http method and version to get only the params
+                final String[] request = line.split(" ");
+                final String params = request[1];
+
+                // now strip everything except authorization code
+                if (params.contains("?")) {
+                    int queryStartIndex = params.indexOf("?");
+                    String query = params.substring(queryStartIndex + 1, params.length());
+
+                    // split each param up
+                    String[] param = query.split("&");
+
+                    code = param[0].split("=")[1];
+                    break;
+                } else {
+                    throw new IllegalStateException("Invalid authorization code redirect URL");
+                }
+            } catch (Exception e) {
+                //
+            } finally {
+                client.close();
+            }
+        }
+
+        return code;
     }
 }

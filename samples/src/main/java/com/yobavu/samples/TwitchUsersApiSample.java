@@ -27,9 +27,10 @@ public class TwitchUsersApiSample {
         Properties prop = new Properties();
         prop.load(new FileInputStream("samples/src/main/resources/jtwitch.properties"));
 
-        final String redirectUri = "http://localhost/";
+        final String redirectUri = "http://localhost:8000/";
         final String clientId = prop.getProperty("twitch.clientId");
         final String clientSecret = prop.getProperty("twitch.clientSecret");
+        // this is id of user associated with token - in other words, your Twitch account id
         final String twitchUserId = prop.getProperty("twitch.userId");
 
         OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri);
@@ -85,7 +86,8 @@ public class TwitchUsersApiSample {
 
         for (UserFollow f : userFollows.getFollows()) {
             sb.append("Channel '").append(f.getChannel().getDisplayName())
-                    .append("' which has ").append(f.getChannel().getFollowers()).append(" followers!\n");
+                    .append("' which has ")
+                    .append(f.getChannel().getFollowers()).append(" followers!\n");
         }
 
         String results = sb.toString();
