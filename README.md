@@ -33,19 +33,6 @@ Execute a request:
 ```java
 // userId is id of user associated with token - in other words, your Twitch account id
 UserFollows userFollows = usersApi.getChannelsFollowedByUser(userId);
-
-System.out.println("User is following:");
-
-StringBuilder sb = new StringBuilder();
-
-for (UserFollow f : userFollows.getFollows()) {
-    sb.append("Channel '").append(f.getChannel().getDisplayName())
-        .append("' which has ").append(f.getChannel().getFollowers())
-        .append(" followers!\n");
-}
-
-String results = sb.toString();
-System.out.println(results);
 ```
 ## Examples
 There are a few samples in `samples/src/main`.
