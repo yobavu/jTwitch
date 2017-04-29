@@ -20,7 +20,7 @@ OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirect
 // sampleUse is key used for storing token
 TwitchToken twitchToken = oaa.authenticate("sampleUse");
 ```
-Create an API instance:
+Create an API wrapper instance:
 ```java
 TwitchFactory factory = new TwitchFactory.Builder()
     .setClientId(clientId)
