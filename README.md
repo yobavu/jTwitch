@@ -4,7 +4,32 @@ OAuth 2 Twitch API wrapper written in Java.
 
 It is simple to use and should not require a lot of effort to get up and running.
 
-Still in the early stages - but what is already implemented should work; checkout the samples.
+Still in the early stages - but what is already implemented should work; checkout the examples.
+
+### Table of Contents
+- [Progress](#progress)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Download](#download)
+- [License](#license)
+
+Progress
+--------
+Twitch API checklist:
+ - Bits
+ - Channel Feed
+ - Channels
+ - Chat
+ - Clips
+ - Collections
+ - Communities
+ - Games
+ - Ingests
+ - Search
+ - Streams
+ - Teams
+ - ~~Users~~
+ - Videos
 
 Usage
 -----
