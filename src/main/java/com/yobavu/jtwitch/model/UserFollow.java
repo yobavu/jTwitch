@@ -6,12 +6,14 @@ package com.yobavu.jtwitch.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 /**
  * Channel Twitch user follows.
  */
 public class UserFollow {
     @SerializedName("created_at")
-    private String createdAt;
+    private Date createdAt;
 
     @SerializedName("notifications")
     private boolean notifications;
@@ -22,7 +24,7 @@ public class UserFollow {
     /**
      * Gets date follow was made on.
      */
-    public String getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 

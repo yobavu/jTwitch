@@ -20,6 +20,8 @@ public final class TwitchFactory {
 
     private Map<API, Object> factory;
 
+    private static final String TWITCH_API_VERSION = "application/vnd.twitchtv.v5+json";
+
     /**
      * Builder for {@link TwitchFactory}.
      */
@@ -52,7 +54,7 @@ public final class TwitchFactory {
                 @Override
                 public okhttp3.Response intercept(Chain chain) throws IOException {
                     Request request = chain.request().newBuilder()
-                            .addHeader("Accept", "application/vnd.twitchtv.v5+json")
+                            .addHeader("Accept", TWITCH_API_VERSION)
                             .addHeader("Client-ID", clientId)
                             .addHeader("Authorization", "OAuth " + accessToken)
                             .build();

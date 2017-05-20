@@ -71,6 +71,7 @@ public class TwitchUsersApiSample {
             System.out.println("Display name: " + u.getDisplayName());
             System.out.println("User name: " + u.getName());
             System.out.println("Account type: " + u.getType());
+            System.out.println("Account type: " + u.getCreatedAt());
         }
     }
 
