@@ -23,7 +23,7 @@ import retrofit2.http.Query;
 import java.util.List;
 
 /**
- * Represents the Twitch user API.
+ * Represents the Twitch users API.
  * @// TODO: Implement wraps for Viewer Heartbeat Service
  */
 public interface UserService {

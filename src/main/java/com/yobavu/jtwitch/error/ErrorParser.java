@@ -4,6 +4,8 @@
 
 package com.yobavu.jtwitch.error;
 
+import com.yobavu.jtwitch.exceptions.TwitchApiException;
+
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import retrofit2.Response;
@@ -16,7 +18,7 @@ import java.io.IOException;
 public final class ErrorParser {
     private ErrorParser() {}
 
-    public static ApiError parseError(Response<?> response) {
+    private static ApiError parseError(Response<?> response) {
         if (response.isSuccessful()) {
             return null;
         }
@@ -28,6 +30,19 @@ public final class ErrorParser {
             return apiErrorJsonAdapter.fromJson(response.errorBody().string());
         } catch (IOException io) {
             return new ApiError(response.code(), null, "Unknown error");
+        }
+    }
+
+    /**
+     * Parses response and handle errors if present.
+     *
+     * @param response the response from service.
+     */
+    public static void checkForErrors(Response response) throws TwitchApiException {
+        ApiError apiError = parseError(response);
+
+        if (apiError != null) {
+            throw new TwitchApiException(apiError.getMessage());
         }
     }
 }

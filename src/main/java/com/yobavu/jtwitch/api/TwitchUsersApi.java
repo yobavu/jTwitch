@@ -4,7 +4,6 @@
 
 package com.yobavu.jtwitch.api;
 
-import com.yobavu.jtwitch.error.ApiError;
 import com.yobavu.jtwitch.error.ErrorParser;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.User;
@@ -53,7 +52,7 @@ public class TwitchUsersApi {
         Call<User> call = userService.getUser();
 
         Response<User> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -68,7 +67,7 @@ public class TwitchUsersApi {
         Call<UserList> call = userService.getUserByUsername(username);
 
         Response<UserList> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -82,7 +81,7 @@ public class TwitchUsersApi {
         Call<User> call = userService.getUserById(userId);
 
         Response<User> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -112,7 +111,7 @@ public class TwitchUsersApi {
         Call<UserSubscription> call = userService.getUserChannelSubscription(userId, channelId);
 
         Response<UserSubscription> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -171,7 +170,7 @@ public class TwitchUsersApi {
         Call<UserFollowList> call = userService.getChannelsFollowedByUser(userId, limit, offset, direction, sortby);
 
         Response<UserFollowList> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -186,7 +185,7 @@ public class TwitchUsersApi {
         Call<UserFollow> call = userService.checkUserFollowsChannel(userId, channelId);
 
         Response<UserFollow> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -201,7 +200,7 @@ public class TwitchUsersApi {
         Call<UserFollow> call = userService.followChannel(userId, channelId);
 
         Response<UserFollow> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -257,7 +256,7 @@ public class TwitchUsersApi {
         Call<UserBlockList> call = userService.getUserBlockList(userId, limit, offset);
 
         Response<UserBlockList> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -274,7 +273,7 @@ public class TwitchUsersApi {
         Call<UserBlock> call = userService.blockUser(userId, blockId);
 
         Response<UserBlock> response = call.execute();
-        checkForErrors(response);
+        ErrorParser.checkForErrors(response);
 
         return response.body();
     }
@@ -291,18 +290,5 @@ public class TwitchUsersApi {
         Call<Void> call = userService.unblockUser(userId, unblockId);
 
         call.execute();
-    }
-
-    /**
-     * Parses response and handle errors if present.
-     *
-     * @param response the response from service.
-     */
-    private void checkForErrors(Response response) throws TwitchApiException {
-        ApiError apiError = ErrorParser.parseError(response);
-
-        if (apiError != null) {
-            throw new TwitchApiException(apiError.getMessage());
-        }
     }
 }
