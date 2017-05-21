@@ -7,6 +7,7 @@ package com.yobavu.jtwitch.api;
 import com.google.gson.Gson;
 import com.yobavu.jtwitch.model.Channel;
 import com.yobavu.jtwitch.model.Video;
+import com.yobavu.jtwitch.model.VideoList;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,9 +41,9 @@ public class TwitchVideosApiTest {
                 "   \"broadcast_id\": 1," +
                 "   \"broadcast_type\": \"upload\"," +
                 "   \"channel\": {" +
-                "       \"_id\": \"44322889\"," +
-                "       \"name\": \"dallas\"," +
-                "       \"display_name\": \"dallas\"" +
+                "      \"_id\": \"44322889\"," +
+                "      \"name\": \"dallas\"," +
+                "      \"display_name\": \"dallas\"" +
                 "   }," +
                 "   \"created_at\": \"2016-12-10T00:46:44Z\"," +
                 "   \"description\": \"Checkout Twitch Videos!\"," +
@@ -56,14 +57,14 @@ public class TwitchVideosApiTest {
                 "   \"language\": \"en\"," +
                 "   \"length\": 29," +
                 "   \"muted_segments\": [" +
-                "        {" +
-                "            \"duration\": 360," +
-                "            \"offset\": 5220" +
-                "        }," +
-                "        {" +
-                "            \"duration\": 360," +
-                "            \"offset\": 7020" +
-                "        }" +
+                "       {" +
+                "           \"duration\": 360," +
+                "           \"offset\": 5220" +
+                "       }," +
+                "       {" +
+                "           \"duration\": 360," +
+                "           \"offset\": 7020" +
+                "       }" +
                 "    ]," +
                 "   \"preview\": {" +
                 "      \"small\": \"https://static-cdn.jtvnw.net/s3_vods/twitch/106400740/f2979575-fa80-4ad9-9665-a074d510a03a/thumb/index-0000000000-80x45.jpg\"," +
@@ -107,5 +108,85 @@ public class TwitchVideosApiTest {
         Assert.assertEquals("Checkout Twitch Videos!", video.getDescription());
         Assert.assertTrue(video.getFps().size() == 3);
         Assert.assertTrue(video.getFps().containsKey("480p"));
+    }
+
+    @Test
+    public void getTopVideos() throws Exception {
+        final String json = "{" +
+                "   \"vods\": [" +
+                "      {" +
+                "         \"_id\": \"v14567223\"," +
+                "         \"broadcast_id\": 1," +
+                "         \"broadcast_type\": \"upload\"," +
+                "         \"channel\": {" +
+                "            \"_id\": \"44322889\"," +
+                "            \"name\": \"dallas\"," +
+                "            \"display_name\": \"dallas\"" +
+                "         }," +
+                "         \"created_at\": \"2016-12-10T00:46:44Z\"," +
+                "         \"description\": \"Checkout Twitch Videos!\"," +
+                "         \"fps\": {" +
+                "            \"1080p\": 23.9767661758746," +
+                "            \"480p\": 23.8767661758746," +
+                "            \"720p\": 23.7767661758746" +
+                "         }," +
+                "         \"language\": \"en\"," +
+                "         \"length\": 29," +
+                "         \"published_at\": \"2016-12-12T18:19:18Z\"," +
+                "         \"resolutions\": {" +
+                "            \"1080p\": \"1920x1080\"" +
+                "         }," +
+                "         \"status\": \"recorded\"," +
+                "         \"title\": \"Introducing Twitch Video\"," +
+                "         \"url\": \"https://www.twitch.tv/twitch/v/14567223\"," +
+                "         \"viewable\": \"public\"," +
+                "         \"viewable_at\": null," +
+                "         \"views\": 7638" +
+                "      }," +
+                "      {" +
+                "         \"_id\": \"v24567223\"," +
+                "         \"broadcast_id\": 2," +
+                "         \"broadcast_type\": \"highlight\"," +
+                "         \"channel\": {" +
+                "            \"_id\": \"44322889\"," +
+                "            \"name\": \"dallas\"," +
+                "            \"display_name\": \"dallas\"" +
+                "         }," +
+                "         \"created_at\": \"2016-12-15T00:46:44Z\"," +
+                "         \"description\": \"Checkout More Twitch Videos!\"," +
+                "         \"fps\": {" +
+                "            \"1080p\": 23.9767661758746," +
+                "            \"480p\": 23.8767661758746," +
+                "            \"720p\": 23.7767661758746" +
+                "         }," +
+                "         \"language\": \"en\"," +
+                "         \"length\": 15," +
+                "         \"published_at\": \"2016-12-15T18:19:18Z\"," +
+                "         \"resolutions\": {" +
+                "            \"1080p\": \"1920x1080\"" +
+                "         }," +
+                "         \"status\": \"recorded\"," +
+                "         \"title\": \"Introducing More Twitch Video\"," +
+                "         \"url\": \"https://www.twitch.tv/twitch/v/24567223\"," +
+                "         \"viewable\": \"public\"," +
+                "         \"viewable_at\": null," +
+                "         \"views\": 638" +
+                "      }" +
+                "   ]" +
+                "}";
+
+        Response<VideoList> response = Response.success(gson.fromJson(json, VideoList.class));
+
+        Mockito.when(videosApi.getTopVideos()).thenReturn(response.body());
+
+        VideoList videoList = videosApi.getTopVideos();
+        Assert.assertEquals(2, videoList.getTopVideos().size());
+
+        Video video1 = videoList.getTopVideos().get(0);
+        Video video2 = videoList.getTopVideos().get(1);
+
+        Assert.assertEquals(video1.getId(), "v14567223");
+        Assert.assertEquals(video2.getId(), "v24567223");
+        Assert.assertNotEquals(video1.getBroadcastId(), video2.getBroadcastId());
     }
 }

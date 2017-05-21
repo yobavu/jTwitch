@@ -79,15 +79,15 @@ public interface UserService {
      * Gets list of channels followed by specific user.
      *
      * @param userId the id for specific user account.
-     * @param limit optional parameter - sets limit of results.
+     * @param limit optional - sets limit of results.
      *              Default: 25.
      *              Max: 100.
-     * @param offset optional parameter - use for pagination of results.
+     * @param offset optional - use for pagination of results.
      *               Default: 0.
-     * @param direction optional parameter - sort direction.
+     * @param direction optional - sort direction.
      *                  Valid values: asc and desc.
      *                  Default: desc.
-     * @param sortby optional parameter - sort results.
+     * @param sortby optional - sort results.
      *               Valid values: created_at, last_broadcast, login.
      *               Default: created_at.
      */
@@ -132,10 +132,10 @@ public interface UserService {
      * Requires "user_blocks_read" scope.
      *
      * @param userId the id of specific user account.
-     * @param limit optional parameter - sets limit of results.
+     * @param limit optional - sets limit of results.
      *              Default: 25.
      *              Max: 100.
-     * @param offset optional parameter - use for pagination of results.
+     * @param offset optional - use for pagination of results.
      *               Default: 0.
      */
     @GET("users/{userId}/blocks")

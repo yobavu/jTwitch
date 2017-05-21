@@ -168,7 +168,7 @@ public class Video {
     }
 
     /**
-     * Get video preview.
+     * Get video preview image.
      */
     public Map<String, String> getPreview() {
         return preview;
