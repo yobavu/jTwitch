@@ -18,7 +18,7 @@ public class Video {
     private String id;
 
     @SerializedName("broadcast_id")
-    private int broadcastId;
+    private long broadcastId;
 
     @SerializedName("broadcast_type")
     private String broadcastType;
@@ -93,7 +93,7 @@ public class Video {
     /**
      * Gets video's broadcast id.
      */
-    public int getBroadcastId() {
+    public long getBroadcastId() {
         return broadcastId;
     }
 

@@ -49,6 +49,6 @@ public interface VideoService {
      */
     @GET("videos/top")
     Call<VideoList> getTopVideos(@Query("limit") int limit, @Query("offset") int offset, @Query("game") String game,
-                                 @Query("period") String period, @Query("broadcast_type") List<String> broadcastType,
-                                 @Query("language") List<String> language, @Query("sort") String sort);
+                                 @Query("period") String period, @Query("broadcast_type") String broadcastType,
+                                 @Query("language") String language, @Query("sort") String sort);
 }

@@ -16,7 +16,7 @@ import java.util.Map;
  * Factory for Twitch API.
  */
 public final class TwitchFactory {
-    public enum API { Users }
+    public enum API { Users, Videos }
 
     private Map<API, Object> factory;
 
@@ -63,6 +63,7 @@ public final class TwitchFactory {
             });
 
             factory.put(API.Users, new TwitchUsersApi(clientBuilder));
+            factory.put(API.Videos, new TwitchVideosApi(clientBuilder));
 
             return new TwitchFactory(this.factory);
         }
