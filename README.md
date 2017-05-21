@@ -15,6 +15,8 @@ Still in the early stages - but what is already implemented should work; checkou
 
 Progress
 --------
+In progress development will be made on the develop branch until finished and then merge into master.
+
 Twitch API checklist:
  - Bits
  - Channel Feed
@@ -29,7 +31,7 @@ Twitch API checklist:
  - Streams
  - Teams
  - ~~Users~~
- - Videos
+ - Videos (in progress)
 
 Usage
 -----
