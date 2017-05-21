@@ -24,6 +24,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import retrofit2.Response;
 
+import java.util.Date;
 import java.util.List;
 
 public class TwitchUsersApiTest {
@@ -72,7 +73,7 @@ public class TwitchUsersApiTest {
         final User user = userList.getUsers().get(0);
         Assert.assertEquals(1, user.getId());
         Assert.assertEquals("Just a gamer playing games and chatting.", user.getBio());
-        Assert.assertEquals("2013-06-03T19:12:02Z", user.getCreatedAt());
+        Assert.assertThat(user.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
         Assert.assertEquals("tester", user.getDisplayName());
         Assert.assertEquals("tester", user.getName());
         Assert.assertEquals("staff", user.getType());
@@ -97,7 +98,7 @@ public class TwitchUsersApiTest {
         final User user = usersApi.getUserById(USER_ID);
         Assert.assertEquals(USER_ID, user.getId());
         Assert.assertEquals("Just a gamer playing games and chatting.", user.getBio());
-        Assert.assertEquals("2013-06-03T19:12:02Z", user.getCreatedAt());
+        Assert.assertThat(user.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
         Assert.assertEquals("tester_display", user.getDisplayName());
         Assert.assertEquals("tester", user.getName());
         Assert.assertEquals("user", user.getType());
@@ -154,7 +155,7 @@ public class TwitchUsersApiTest {
         final Channel channel = subscription.getChannel();
         Assert.assertEquals(19571752, channel.getId());
         Assert.assertEquals("en", channel.getBroadcasterLanguage());
-        Assert.assertEquals("2011-01-16T04:35:51Z", channel.getCreatedAt());
+        Assert.assertThat(channel.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
         Assert.assertEquals("forstycup", channel.getDisplayName());
         Assert.assertEquals(397, channel.getFollowers());
         Assert.assertEquals("Final Fantasy XV", channel.getGame());
@@ -234,14 +235,14 @@ public class TwitchUsersApiTest {
         Assert.assertEquals(2, followList.size());
 
         final UserFollow follow1 = followList.get(0);
-        Assert.assertEquals("2016-09-16T20:37:39Z", follow1.getCreatedAt());
+        Assert.assertThat(follow1.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
         Assert.assertFalse(follow1.getNotifications());
         Assert.assertThat(follow1.getChannel(), IsInstanceOf.instanceOf(Channel.class));
 
         final Channel channel1 = follow1.getChannel();
         Assert.assertEquals(12826, channel1.getId());
         Assert.assertEquals("en", channel1.getBroadcasterLanguage());
-        Assert.assertEquals("2007-05-22T10:39:54Z", channel1.getCreatedAt());
+        Assert.assertThat(channel1.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
 
         final UserFollow follow2 = followList.get(1);
         final Channel channel2 = follow2.getChannel();
@@ -290,7 +291,7 @@ public class TwitchUsersApiTest {
         Mockito.when(usersApi.followChannel(USER_ID, CHANNEL_TO_FOLLOW)).thenReturn(response.body());
 
         final UserFollow follow = usersApi.followChannel(USER_ID, CHANNEL_TO_FOLLOW);
-        Assert.assertEquals("2016-12-14T10:28:32-08:00", follow.getCreatedAt());
+        Assert.assertThat(follow.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
         Assert.assertFalse(follow.getNotifications());
 
         final Channel channel = follow.getChannel();

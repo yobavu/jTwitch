@@ -30,14 +30,12 @@ import java.util.List;
  * @// TODO: Implement wraps for Viewer Heartbeat Service
  */
 public class TwitchUsersApi extends TwitchApi {
-    private static final String API_URL = "https://api.twitch.tv/kraken/";
-
     private UserService userService;
 
     public TwitchUsersApi(OkHttpClient.Builder clientBuilder) {
         super();
         userService = new Retrofit.Builder()
-                .baseUrl(API_URL)
+                .baseUrl(super.getApiUrl())
                 .addConverterFactory(GsonConverterFactory.create(super.gson))
                 .client(clientBuilder.build())
                 .build()
