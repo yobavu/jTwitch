@@ -145,25 +145,22 @@ public class TwitchUsersApi extends TwitchApi {
             throw new IllegalArgumentException("Invalid number of optional parameters");
         }
 
-        switch (queryParams.length) {
-            case 1:
+        if (queryParams.length > 0) {
+            if (queryParams[0] != null) {
                 limit = (Integer) queryParams[0];
-                break;
-            case 2:
-                limit = (Integer) queryParams[0];
+            }
+
+            if (queryParams[1] != null) {
                 offset = (Integer) queryParams[1];
-                break;
-            case 3:
-                limit = (Integer) queryParams[0];
-                offset = (Integer) queryParams[1];
+            }
+
+            if (queryParams[2] != null) {
                 direction = (String) queryParams[2];
-                break;
-            case 4:
-                limit = (Integer) queryParams[0];
-                offset = (Integer) queryParams[1];
-                direction = (String) queryParams[2];
+            }
+
+            if (queryParams[3] != null) {
                 sortby = (String) queryParams[3];
-                break;
+            }
         }
 
         Call<UserFollowList> call = userService.getChannelsFollowedByUser(userId, limit, offset, direction, sortby);
