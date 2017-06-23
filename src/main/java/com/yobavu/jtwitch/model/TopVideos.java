@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * List of top Twitch videos.
  */
-public class VideoList {
+public class TopVideos {
     @SerializedName("vods")
     private List<Video> topVideos;
 

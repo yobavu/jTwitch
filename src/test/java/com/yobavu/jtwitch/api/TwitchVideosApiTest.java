@@ -7,7 +7,7 @@ package com.yobavu.jtwitch.api;
 import com.google.gson.Gson;
 import com.yobavu.jtwitch.model.Channel;
 import com.yobavu.jtwitch.model.Video;
-import com.yobavu.jtwitch.model.VideoList;
+import com.yobavu.jtwitch.model.TopVideos;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import retrofit2.Response;
 
 import java.util.Date;
+import java.util.List;
 
 public class TwitchVideosApiTest {
     private Gson gson;
@@ -175,18 +176,66 @@ public class TwitchVideosApiTest {
                 "   ]" +
                 "}";
 
-        Response<VideoList> response = Response.success(gson.fromJson(json, VideoList.class));
+        Response<TopVideos> response = Response.success(gson.fromJson(json, TopVideos.class));
 
         Mockito.when(videosApi.getTopVideos()).thenReturn(response.body());
 
-        VideoList videoList = videosApi.getTopVideos();
-        Assert.assertEquals(2, videoList.getTopVideos().size());
+        TopVideos topVideos = videosApi.getTopVideos();
+        Assert.assertEquals(2, topVideos.getTopVideos().size());
 
-        Video video1 = videoList.getTopVideos().get(0);
-        Video video2 = videoList.getTopVideos().get(1);
+        Video video1 = topVideos.getTopVideos().get(0);
+        Video video2 = topVideos.getTopVideos().get(1);
 
         Assert.assertEquals(video1.getId(), "v14567223");
         Assert.assertEquals(video2.getId(), "v24567223");
         Assert.assertNotEquals(video1.getBroadcastId(), video2.getBroadcastId());
+    }
+
+    @Test
+    public void testFollowedVideo() throws Exception {
+        final String json = "{" +
+                "   \"videos\": [{" +
+                "      \"_id\": \"v107666453\"," +
+                "      \"broadcast_id\": 23939865056," +
+                "      \"broadcast_type\": \"archive\"," +
+                "      \"channel\": {" +
+                "         \"_id\": 14836307," +
+                "         \"display_name\": \"TrumpSC\"," +
+                "         \"name\": \"trumpsc\"" +
+                "      }," +
+                "      \"created_at\": \"2016-12-15T20:33:02Z\"," +
+                "      \"description\": null," +
+                "      \"description_html\": null," +
+                "      \"fps\": {\n" +
+                "         \"mobile\": 26.25" +
+                "      }," +
+                "      \"game\": \"Hearthstone: Heroes of Warcraft\"," +
+                "      \"language\": \"en\"," +
+                "      \"length\": 6368," +
+                "      \"published_at\": \"2016-12-15T20:33:02Z\"," +
+                "      \"resolutions\": {" +
+                "         \"low\": \"640x360\"," +
+                "         \"medium\": \"852x480\"," +
+                "         \"mobile\": \"400x226\"" +
+                "      },\n" +
+                "      \"status\": \"recording\"," +
+                "      \"thumbnails\": {" +
+                "         \"large\": [{" +
+                "            \"type\": \"generated\"," +
+                "            \"url\": \"https://static-cdn.jtvnw.net/v1/AUTH_system/vods_631b/trumpsc_23939865056_564912068/thumb/thumb0-640x360.jpg\"" +
+                "         }]," +
+                "         \"medium\": [{" +
+                "            \"type\": \"generated\"," +
+                "            \"url\": \"https://static-cdn.jtvnw.net/v1/AUTH_system/vods_631b/trumpsc_23939865056_564912068/thumb/thumb0-320x180.jpg\"" +
+                "         }]" +
+                "      }," +
+                "      \"title\": \"TSM Trump Renolock\"," +
+                "      \"url\": \"https://www.twitch.tv/trumpsc/v/107666453\"," +
+                "      \"viewable\": \"public\"," +
+                "      \"views\": 10" +
+                "   }]" +
+                "}";
+
+//        Response<List<Video>> response = Response.success(gson.fromJson(json, Video.class));
     }
 }

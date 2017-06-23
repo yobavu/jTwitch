@@ -5,7 +5,7 @@
 package com.yobavu.jtwitch.services;
 
 import com.yobavu.jtwitch.model.Video;
-import com.yobavu.jtwitch.model.VideoList;
+import com.yobavu.jtwitch.model.TopVideos;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -48,7 +48,30 @@ public interface VideoService {
      *                  views: videos are sorted by view count, in descending order.
      */
     @GET("videos/top")
-    Call<VideoList> getTopVideos(@Query("limit") int limit, @Query("offset") int offset, @Query("game") String game,
+    Call<TopVideos> getTopVideos(@Query("limit") Integer limit, @Query("offset") Integer offset, @Query("game") String game,
                                  @Query("period") String period, @Query("broadcast_type") String broadcastType,
                                  @Query("language") String language, @Query("sort") String sort);
+
+    /**
+     * Gets the videos from channels followed by user.
+     *
+     * @param limit optional - sets limit of results. Sorted by creation date.
+     *              Default: 10.
+     *              Max: 100.
+     * @param offset optional - use for pagination of results.
+     *               Default: 0.
+     * @param broadcastType optional - constraint videos by type.
+     *                       Valid values: archive, highlight, upload.
+     *                       Default: all types (no filter)
+     * @param language optional - constraint videos by language.
+     *                 Example values: en, es.
+     * @param sort optional - sort videos returned.
+     *             Valid values:
+     *                  time: videos are sorted by publication time, most recent first.
+     *                  views: videos are sorted by view count, in descending order.
+     */
+    @GET("videos/followed")
+    Call<List<Video>> getFollowedVideos(@Query("limit") Integer limit, @Query("offset") Integer offset,
+                                        @Query("broadcast_type") String broadcastType, @Query("language") String language,
+                                        @Query("sort") String sort);
 }
