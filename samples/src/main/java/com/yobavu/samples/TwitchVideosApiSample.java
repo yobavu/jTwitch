@@ -6,6 +6,7 @@ package com.yobavu.samples;
 
 import com.yobavu.jtwitch.api.TwitchFactory;
 import com.yobavu.jtwitch.api.TwitchVideosApi;
+import com.yobavu.jtwitch.model.FollowedVideos;
 import com.yobavu.jtwitch.model.Video;
 import com.yobavu.jtwitch.oauth.OAuth2Authenticate;
 import com.yobavu.jtwitch.oauth.TwitchToken;
@@ -47,10 +48,11 @@ public class TwitchVideosApiSample {
         Video video = videosApi.getVideoById(145467223);
         System.out.println("Channel video belongs to: " + video.getChannel().getDisplayName());
 
-        List<Video> vids = videosApi.getFollowedVideos();
+        System.out.println("Videos from followed channels");
+        FollowedVideos vids = videosApi.getFollowedVideos();
 
-        for (Video v: vids) {
-            //
+        for (Video v: vids.getVideos()) {
+            System.out.println("Title: " + v.getTitle());
         }
     }
 }

@@ -6,6 +6,7 @@ package com.yobavu.jtwitch.api;
 
 import com.yobavu.jtwitch.error.ErrorParser;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
+import com.yobavu.jtwitch.model.FollowedVideos;
 import com.yobavu.jtwitch.model.Video;
 import com.yobavu.jtwitch.model.TopVideos;
 import com.yobavu.jtwitch.services.VideoService;
@@ -167,6 +168,8 @@ public class TwitchVideosApi extends TwitchApi {
     /**
      * Gets the videos from channels followed by user.
      *
+     * Requires "user_read" scope.
+     *
      * @param queryParams optional set of parameters:
      *        <ul>
      *            <li>
@@ -195,7 +198,7 @@ public class TwitchVideosApi extends TwitchApi {
      *            </li>
      *        </ul>
      */
-    public List<Video> getFollowedVideos(Object... queryParams) throws IOException, TwitchApiException {
+    public FollowedVideos getFollowedVideos(Object... queryParams) throws IOException, TwitchApiException {
         Integer limit = null;
         Integer offset = null;
         String broadcastType = null;
@@ -256,9 +259,9 @@ public class TwitchVideosApi extends TwitchApi {
             }
         }
 
-        Call<List<Video>> call = videoService.getFollowedVideos(limit, offset, broadcastType, languages, sort);
+        Call<FollowedVideos> call = videoService.getFollowedVideos(limit, offset, broadcastType, languages, sort);
 
-        Response<List<Video>> response = call.execute();
+        Response<FollowedVideos> response = call.execute();
         ErrorParser.checkForErrors(response);
 
         return response.body();

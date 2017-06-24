@@ -4,14 +4,13 @@
 
 package com.yobavu.jtwitch.services;
 
+import com.yobavu.jtwitch.model.FollowedVideos;
 import com.yobavu.jtwitch.model.Video;
 import com.yobavu.jtwitch.model.TopVideos;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-
-import java.util.List;
 
 /**
  * Represents the Twitch videos API.
@@ -55,6 +54,8 @@ public interface VideoService {
     /**
      * Gets the videos from channels followed by user.
      *
+     * Requires "user_read" scope.
+     *
      * @param limit optional - sets limit of results. Sorted by creation date.
      *              Default: 10.
      *              Max: 100.
@@ -71,7 +72,7 @@ public interface VideoService {
      *                  views: videos are sorted by view count, in descending order.
      */
     @GET("videos/followed")
-    Call<List<Video>> getFollowedVideos(@Query("limit") Integer limit, @Query("offset") Integer offset,
-                                        @Query("broadcast_type") String broadcastType, @Query("language") String language,
-                                        @Query("sort") String sort);
+    Call<FollowedVideos> getFollowedVideos(@Query("limit") Integer limit, @Query("offset") Integer offset,
+                                           @Query("broadcast_type") String broadcastType, @Query("language") String language,
+                                           @Query("sort") String sort);
 }

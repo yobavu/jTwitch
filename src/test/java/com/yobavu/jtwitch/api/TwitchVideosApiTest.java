@@ -6,6 +6,7 @@ package com.yobavu.jtwitch.api;
 
 import com.google.gson.Gson;
 import com.yobavu.jtwitch.model.Channel;
+import com.yobavu.jtwitch.model.FollowedVideos;
 import com.yobavu.jtwitch.model.Video;
 import com.yobavu.jtwitch.model.TopVideos;
 import org.hamcrest.core.IsInstanceOf;
@@ -36,7 +37,7 @@ public class TwitchVideosApiTest {
     }
 
     @Test
-    public void getVideoById() throws Exception {
+    public void testGetVideoById() throws Exception {
         final String json = "{" +
                 "   \"_id\": \"v14567223\"," +
                 "   \"broadcast_id\": 1," +
@@ -112,7 +113,7 @@ public class TwitchVideosApiTest {
     }
 
     @Test
-    public void getTopVideos() throws Exception {
+    public void testGetTopVideos() throws Exception {
         final String json = "{" +
                 "   \"vods\": [" +
                 "      {" +
@@ -192,7 +193,7 @@ public class TwitchVideosApiTest {
     }
 
     @Test
-    public void testFollowedVideo() throws Exception {
+    public void testGetFollowedVideo() throws Exception {
         final String json = "{" +
                 "   \"videos\": [{" +
                 "      \"_id\": \"v107666453\"," +
@@ -236,6 +237,14 @@ public class TwitchVideosApiTest {
                 "   }]" +
                 "}";
 
-//        Response<List<Video>> response = Response.success(gson.fromJson(json, Video.class));
+        Response<FollowedVideos> response = Response.success(gson.fromJson(json, FollowedVideos.class));
+
+        Mockito.when(videosApi.getFollowedVideos()).thenReturn(response.body());
+
+        FollowedVideos videos = videosApi.getFollowedVideos();
+        Assert.assertTrue(videos.getVideos().size() == 1);
+
+        Video video = videos.getVideos().get(0);
+        Assert.assertEquals("TSM Trump Renolock", video.getTitle());
     }
 }
