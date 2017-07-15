@@ -127,7 +127,6 @@ public class TwitchVideosApi extends TwitchApi {
             if (queryParams[4] != null) {
                 broadcastTypeList = (List<String>) queryParams[4];
 
-
                 for (String s : broadcastTypeList) {
                     sb.append(s);
                     sb.append(",");
@@ -265,5 +264,38 @@ public class TwitchVideosApi extends TwitchApi {
         ErrorParser.checkForErrors(response);
 
         return response.body();
+    }
+
+    /**
+     * Creates a new video in a channel.
+     *
+     * Requires "channel_editor" scope.
+     *
+     * @param channelId the id of channel.
+     * @param videoTitle the title of video.
+     * @param queryParams optional set of parameters:
+     *        <ul>
+     *            <li>
+     *                desc: description of video.
+     *            </li>
+     *            <li>
+     *                game: name of game in video.
+     *            </li>
+     *            <li>
+     *                language: language of video. Example values: en, es.
+     *            </li>
+     *            <li>
+     *                tagList: tags describing the video. Max 100 char for a tag, 500 char total. Example values: walkthrough,shooter.
+     *            </li>
+     *            <li>
+     *                viewable: specifies who can view video. Valid values: public, private. Default: public.
+     *            </li>
+     *            <li>
+     *                viewableAt: date when video becomes public. Only applies if viewable=private.
+     *            </li>
+     *        </ul>
+     */
+    public Call<Void> createVideo(int channelId, String videoTitle, Object... queryParams) throws IOException, TwitchApiException {
+        //
     }
 }
