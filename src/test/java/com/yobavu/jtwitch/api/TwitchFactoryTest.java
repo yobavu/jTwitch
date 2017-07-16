@@ -21,7 +21,7 @@ public class TwitchFactoryTest {
     }
 
     @Test
-    public void testUsersApiInstance() {
-        Assert.assertThat(factory.getInstance(TwitchFactory.API.Users), IsInstanceOf.instanceOf(TwitchUsersApi.class));
+    public void testUsersApiInstance() throws InstantiationException, IllegalAccessException {
+        Assert.assertThat(factory.getInstance(TwitchUsersApi.class), IsInstanceOf.instanceOf(TwitchUsersApi.class));
     }
 }
