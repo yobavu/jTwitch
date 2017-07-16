@@ -4,9 +4,6 @@
 
 package com.yobavu.jtwitch.api;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.yobavu.jtwitch.error.ErrorParser;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.User;
@@ -14,9 +11,11 @@ import com.yobavu.jtwitch.model.UserBlock;
 import com.yobavu.jtwitch.model.UserBlockList;
 import com.yobavu.jtwitch.model.UserEmoticon;
 import com.yobavu.jtwitch.model.UserFollow;
-import com.yobavu.jtwitch.model.UserFollowList;
 import com.yobavu.jtwitch.model.UserSubscription;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
@@ -124,62 +123,73 @@ public class TwitchUsersApi extends TwitchApi {
         return super.getGson().fromJson(json, UserSubscription.class);
     }
 
-//    /**
-//     * Gets list of channels followed by specific user.
-//     *
-//     * @param userId the id for specific user account.
-//     * @param queryParams optional set of parameters:
-//     *        <ul>
-//     *            <li>
-//     *                limit: sets limit of results. Default: 25 and Max: 100.
-//     *            </li>
-//     *            <li>
-//     *                offset: use for pagination of results. Default: 0.
-//     *            </li>
-//     *            <li>
-//     *                direction: sort direction. Valid values: asc and desc. Default: desc.
-//     *            </li>
-//     *            <li>
-//     *                sortby: sort results. Valid values: created_at, last_broadcast, login. Default: created_at.
-//     *            </li>
-//     *        </ul>
-//     */
-//    public UserFollowList getChannelsFollowedByUser(int userId, Object... queryParams) throws IOException, TwitchApiException {
-//        Integer limit = null;
-//        Integer offset = null;
-//        String direction = null;
-//        String sortby = null;
-//
-//        if (queryParams.length > 4) {
-//            throw new IllegalArgumentException("Invalid number of optional parameters");
-//        }
-//
-//        if (queryParams.length > 0) {
-//            if (queryParams[0] != null) {
-//                limit = (Integer) queryParams[0];
-//            }
-//
-//            if (queryParams[1] != null) {
-//                offset = (Integer) queryParams[1];
-//            }
-//
-//            if (queryParams[2] != null) {
-//                direction = (String) queryParams[2];
-//            }
-//
-//            if (queryParams[3] != null) {
-//                sortby = (String) queryParams[3];
-//            }
-//        }
-//
-//        Call<UserFollowList> call = userService.getChannelsFollowedByUser(userId, limit, offset, direction, sortby);
-//
-//        Response<UserFollowList> response = call.execute();
-//        ErrorParser.checkForErrors(response);
-//
-//        return response.body();
-//    }
-//
+    /**
+     * Gets list of channels followed by specific user.
+     *
+     * @param userId the id for specific user account.
+     * @param queryParams optional set of parameters:
+     *        <ul>
+     *            <li>
+     *                limit: sets limit of results. Default: 25 and Max: 100.
+     *            </li>
+     *            <li>
+     *                offset: use for pagination of results. Default: 0.
+     *            </li>
+     *            <li>
+     *                direction: sort direction. Valid values: asc and desc. Default: desc.
+     *            </li>
+     *            <li>
+     *                sortby: sort results. Valid values: created_at, last_broadcast, login. Default: created_at.
+     *            </li>
+     *        </ul>
+     */
+    public List<UserFollow> getChannelsFollowedByUser(int userId, Object... queryParams) throws IOException, TwitchApiException {
+        Integer limit = null;
+        Integer offset = null;
+        String direction = null;
+        String sortby = null;
+
+        if (queryParams.length > 4) {
+            throw new IllegalArgumentException("Invalid number of optional parameters");
+        }
+
+        if (queryParams.length > 0) {
+            if (queryParams[0] != null) {
+                limit = (Integer) queryParams[0];
+            }
+
+            if (queryParams[1] != null) {
+                offset = (Integer) queryParams[1];
+            }
+
+            if (queryParams[2] != null) {
+                direction = (String) queryParams[2];
+            }
+
+            if (queryParams[3] != null) {
+                sortby = (String) queryParams[3];
+            }
+        }
+
+        response = webTarget.path("users/" + userId).path("follows/channels").queryParam("limit", limit)
+                .queryParam("offset", offset).queryParam("direction", direction).queryParam("sortby", sortby)
+                .request().get();
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        parser = new JsonParser();
+        jsonObject = parser.parse(json).getAsJsonObject();
+
+        JsonArray channels = jsonObject.get("follows").getAsJsonArray();
+        List<UserFollow> followList = new ArrayList<>();
+
+        for (int i = 0; i < channels.size(); i++) {
+            followList.add(super.getGson().fromJson(channels.get(i), UserFollow.class));
+        }
+
+        return followList;
+    }
+
 //    /**
 //     * Check if user follows a specific channel. Will return null if user is not following channel.
 //     *
