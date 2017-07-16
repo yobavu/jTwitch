@@ -6,11 +6,7 @@ package com.yobavu.jtwitch.error;
 
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import retrofit2.Response;
-
-import java.io.IOException;
+import javax.ws.rs.core.Response;
 
 /**
  * Parses a response to check for errors.
@@ -18,18 +14,16 @@ import java.io.IOException;
 public final class ErrorParser {
     private ErrorParser() {}
 
-    private static ApiError parseError(Response<?> response) {
-        if (response.isSuccessful()) {
+    private static ApiError parseError(Response response) {
+        if (response.getStatus() == 200) {
             return null;
         }
 
         try {
-            Moshi moshi = new Moshi.Builder().build();
-            JsonAdapter<ApiError> apiErrorJsonAdapter = moshi.adapter(ApiError.class);
-
-            return apiErrorJsonAdapter.fromJson(response.errorBody().string());
-        } catch (IOException io) {
-            return new ApiError(response.code(), null, "Unknown error");
+            return new ApiError(response.getStatus(), response.getStatusInfo().getReasonPhrase(),
+                    response.getStatusInfo().getFamily().name());
+        } catch (Exception e) {
+            return new ApiError(500, e.getMessage(), null);
         }
     }
 
@@ -42,7 +36,7 @@ public final class ErrorParser {
         ApiError apiError = parseError(response);
 
         if (apiError != null) {
-            throw new TwitchApiException(apiError.getMessage());
+            throw new TwitchApiException(apiError.getError() + ": " + apiError.getMessage());
         }
     }
 }

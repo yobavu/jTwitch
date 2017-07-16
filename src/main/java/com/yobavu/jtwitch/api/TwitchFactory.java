@@ -52,9 +52,7 @@ public final class TwitchFactory {
          * Set headers to each request.
          */
         public TwitchFactory build() {
-            client.register(new OAuth2Authenticator(HttpHeaders.ACCEPT, TWITCH_API_VERSION))
-                  .register(new OAuth2Authenticator("Client-ID", clientId))
-                  .register(new OAuth2Authenticator(HttpHeaders.AUTHORIZATION, "OAuth " + accessToken));
+            client.register(new OAuth2Authenticator(TWITCH_API_VERSION, clientId, accessToken));
 
             factory.put(API.Users, new TwitchUsersApi(client));
 //            factory.put(API.Videos, new TwitchVideosApi(webTarget));
