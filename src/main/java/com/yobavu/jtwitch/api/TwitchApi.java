@@ -13,7 +13,7 @@ import com.google.gson.GsonBuilder;
 public abstract class TwitchApi {
     private final String API_URL = "https://api.twitch.tv/kraken/";
 
-    protected Gson gson;
+    private Gson gson;
 
     public TwitchApi() {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
@@ -21,5 +21,9 @@ public abstract class TwitchApi {
 
     public String getApiUrl() {
         return API_URL;
+    }
+
+    public Gson getGson() {
+        return gson;
     }
 }
