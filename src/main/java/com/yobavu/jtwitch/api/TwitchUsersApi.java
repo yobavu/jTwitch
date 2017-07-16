@@ -15,12 +15,10 @@ import com.yobavu.jtwitch.model.UserBlockList;
 import com.yobavu.jtwitch.model.UserEmoticon;
 import com.yobavu.jtwitch.model.UserFollow;
 import com.yobavu.jtwitch.model.UserFollowList;
-import com.yobavu.jtwitch.model.UserList;
 import com.yobavu.jtwitch.model.UserSubscription;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +49,20 @@ public class TwitchUsersApi extends TwitchApi {
      * Requires "user_read" scope.
      */
     public User getUser() throws TwitchApiException {
-        response = webTarget.path("user").request(MediaType.APPLICATION_JSON_TYPE).get();
+        response = webTarget.path("user").request().get();
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        return super.getGson().fromJson(json, User.class);
+    }
+
+    /**
+     * Gets a specific user account by id.
+     *
+     * @param userId the id for specific user account.
+     */
+    public User getUserById(int userId) throws IOException, TwitchApiException {
+        response = webTarget.path("users/" + userId).request().get();
         ErrorParser.checkForErrors(response);
         String json = response.readEntity(String.class);
 
@@ -62,10 +73,12 @@ public class TwitchUsersApi extends TwitchApi {
      * Gets specific user account(s) by username. All user accounts containing a substring of
      * the username will be returned.
      *
-     * @param username the username for specific user account.
+     * Requires "user_read" scope.
+     *
+     * @param username the username for specific user account. E.g "user1" or "user1,user2".
      */
     public List<User> getUsersByUsername(String username) throws IOException, TwitchApiException {
-        response = webTarget.path("users").queryParam("login", username).request(MediaType.APPLICATION_JSON_TYPE).get();
+        response = webTarget.path("users").queryParam("login", username).request().get();
         ErrorParser.checkForErrors(response);
         String json = response.readEntity(String.class);
 
@@ -82,50 +95,35 @@ public class TwitchUsersApi extends TwitchApi {
         return userList;
     }
 
-//    /**
-//     * Gets a specific user account by id.
-//     *
-//     * @param userId the id for specific user account.
-//     */
-//    public User getUserById(int userId) throws IOException, TwitchApiException {
-//        Call<User> call = userService.getUserById(userId);
-//
-//        Response<User> response = call.execute();
-//        ErrorParser.checkForErrors(response);
-//
-//        return response.body();
-//    }
-//
-//    /**
-//     * Gets a list of the emojis and emoticons that the specified user can use in chat.
-//     *
-//     * Requires "user_subscriptions" scope.
-//     *
-//     * @param userId the id for the specific user account.
-//     */
-//    public List<UserEmoticon> getUserEmotes(int userId) {
-//        // todo
-//        throw new UnsupportedOperationException();
-//    }
-//
-//    /**
-//     * Check if user is subscribed to a specific channel. Will return null if user is not subscribed to channel
-//     * or channel does not have a subscription program.
-//     *
-//     * Requires "user_subscriptions" scope.
-//     *
-//     * @param userId the id for specific user account.
-//     * @param channelId the id for specific channel.
-//     */
-//    public UserSubscription getUserChannelSubscription(int userId, int channelId) throws IOException, TwitchApiException {
-//        Call<UserSubscription> call = userService.getUserChannelSubscription(userId, channelId);
-//
-//        Response<UserSubscription> response = call.execute();
-//        ErrorParser.checkForErrors(response);
-//
-//        return response.body();
-//    }
-//
+    /**
+     * Gets a list of the emojis and emoticons that the specified user can use in chat.
+     *
+     * Requires "user_subscriptions" scope.
+     *
+     * @param userId the id for the specific user account.
+     */
+    public List<UserEmoticon> getUserEmotes(int userId) {
+        // todo
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Check if user is subscribed to a specific channel. Will return null if user is not subscribed to channel
+     * or channel does not have a subscription program.
+     *
+     * Requires "user_subscriptions" scope.
+     *
+     * @param userId the id for specific user account.
+     * @param channelId the id for specific channel.
+     */
+    public UserSubscription getUserChannelSubscription(int userId, int channelId) throws IOException, TwitchApiException {
+        response = webTarget.path("users/" + userId).path("subscriptions/" + channelId).request().get();
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        return super.getGson().fromJson(json, UserSubscription.class);
+    }
+
 //    /**
 //     * Gets list of channels followed by specific user.
 //     *

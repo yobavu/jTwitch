@@ -6,6 +6,8 @@ package com.yobavu.jtwitch.error;
 
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javax.ws.rs.core.Response;
 
 /**
@@ -19,9 +21,12 @@ public final class ErrorParser {
             return null;
         }
 
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject = parser.parse(response.readEntity(String.class)).getAsJsonObject();
+
         try {
-            return new ApiError(response.getStatus(), response.getStatusInfo().getReasonPhrase(),
-                    response.getStatusInfo().getFamily().name());
+            return new ApiError(jsonObject.get("status").getAsInt(), jsonObject.get("error").getAsString(),
+                    jsonObject.get("message").getAsString());
         } catch (Exception e) {
             return new ApiError(500, e.getMessage(), null);
         }
@@ -36,7 +41,15 @@ public final class ErrorParser {
         ApiError apiError = parseError(response);
 
         if (apiError != null) {
-            throw new TwitchApiException(apiError.getError() + ": " + apiError.getMessage());
+            StringBuilder sb = new StringBuilder();
+
+            sb.append(apiError.getStatusCode());
+            sb.append(" ");
+            sb.append(apiError.getError());
+            sb.append(": ");
+            sb.append(apiError.getMessage());
+
+            throw new TwitchApiException(sb.toString());
         }
     }
 }
