@@ -5,13 +5,13 @@
 package com.yobavu.samples;
 
 import com.yobavu.jtwitch.api.TwitchFactory;
+import com.yobavu.jtwitch.api.TwitchUsersApi;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserFollow;
 import com.yobavu.jtwitch.model.UserSubscription;
 import com.yobavu.jtwitch.oauth.OAuth2Authenticate;
 import com.yobavu.jtwitch.oauth.TwitchToken;
-import com.yobavu.jtwitch.api.TwitchUsersApi;
 import com.yobavu.jtwitch.util.TwitchScope;
 
 import java.io.FileInputStream;

@@ -8,7 +8,6 @@ import com.yobavu.jtwitch.error.ErrorParser;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserBlock;
-import com.yobavu.jtwitch.model.UserBlockList;
 import com.yobavu.jtwitch.model.UserEmoticon;
 import com.yobavu.jtwitch.model.UserFollow;
 import com.yobavu.jtwitch.model.UserSubscription;
@@ -20,7 +19,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +59,7 @@ public class TwitchUsersApi extends TwitchApi {
      *
      * @param userId the id for specific user account.
      */
-    public User getUserById(int userId) throws IOException, TwitchApiException {
+    public User getUserById(int userId) throws TwitchApiException {
         response = webTarget.path("users/" + userId).request().get();
         ErrorParser.checkForErrors(response);
         String json = response.readEntity(String.class);
@@ -77,7 +75,7 @@ public class TwitchUsersApi extends TwitchApi {
      *
      * @param username the username for specific user account. E.g "user1" or "user1,user2".
      */
-    public List<User> getUsersByUsername(String username) throws IOException, TwitchApiException {
+    public List<User> getUsersByUsername(String username) throws TwitchApiException {
         response = webTarget.path("users").queryParam("login", username).request().get();
         ErrorParser.checkForErrors(response);
         String json = response.readEntity(String.class);
@@ -116,7 +114,7 @@ public class TwitchUsersApi extends TwitchApi {
      * @param userId the id for specific user account.
      * @param channelId the id for specific channel.
      */
-    public UserSubscription getUserChannelSubscription(int userId, int channelId) throws IOException, TwitchApiException {
+    public UserSubscription getUserChannelSubscription(int userId, int channelId) throws TwitchApiException {
         response = webTarget.path("users/" + userId).path("subscriptions/" + channelId).request().get();
         ErrorParser.checkForErrors(response);
         String json = response.readEntity(String.class);
@@ -144,7 +142,7 @@ public class TwitchUsersApi extends TwitchApi {
      *            </li>
      *        </ul>
      */
-    public List<UserFollow> getChannelsFollowedByUser(int userId, Object... queryParams) throws IOException, TwitchApiException {
+    public List<UserFollow> getChannelsFollowedByUser(int userId, Object... queryParams) throws TwitchApiException {
         Integer limit = null;
         Integer offset = null;
         String direction = null;
@@ -197,7 +195,7 @@ public class TwitchUsersApi extends TwitchApi {
      * @param userId the id for specific user account.
      * @param channelId the id of channel to check.
      */
-    public UserFollow checkUserFollowsChannel(int userId, int channelId) throws IOException, TwitchApiException {
+    public UserFollow checkUserFollowsChannel(int userId, int channelId) throws TwitchApiException {
         response = webTarget.path("users/" + userId).path("follows/channels/" + channelId).request().get();
         ErrorParser.checkForErrors(response);
         String json = response.readEntity(String.class);
@@ -211,7 +209,7 @@ public class TwitchUsersApi extends TwitchApi {
      * @param userId the id for specific user account.
      * @param channelId the id for specific channel to follow.
      */
-    public UserFollow followChannel(int userId, int channelId, boolean notifications) throws IOException, TwitchApiException {
+    public UserFollow followChannel(int userId, int channelId, boolean notifications) throws TwitchApiException {
         response = webTarget.path("users/" + userId).path("follows/channels/" + channelId)
                 .queryParam("notifications", notifications).request().put(Entity.text(""));
         ErrorParser.checkForErrors(response);
@@ -220,90 +218,95 @@ public class TwitchUsersApi extends TwitchApi {
         return super.getGson().fromJson(json, UserFollow.class);
     }
 
-//    /**
-//     * Deletes a specified user from the followers list of a specified channel.
-//     *
-//     * Requires "user_follows_edit" scope.
-//     *
-//     * @param userId the id for specific user account.
-//     * @param channelId the id for specific channel.
-//     */
-//    public void unfollowChannel(int userId, int channelId) throws IOException {
-//        Call<Void> call = userService.unfollowChannel(userId, channelId);
-//
-//        call.execute();
-//    }
-//
-//    /**
-//     * Gets a user's block list. List is sorted by recency; newest first.
-//     *
-//     * Requires "user_blocks_read" scope.
-//     *
-//     * @param userId the id of specific user account.
-//     * @param queryParams optional set of parameters:
-//     *        <ul>
-//     *            <li>
-//     *                limit: sets limit of results. Default: 25 and Max: 100.
-//     *            </li>
-//     *            <li>
-//     *                offset: use for pagination of results. Default: 0.
-//     *            </li>
-//     *        </ul>
-//     */
-//    public UserBlockList getUserBlockList(int userId, Object... queryParams) throws IOException, TwitchApiException {
-//        Integer limit = null;
-//        Integer offset = null;
-//
-//        if (queryParams.length > 2) {
-//            throw new IllegalArgumentException("Invalid number of optional parameters");
-//        }
-//
-//        switch (queryParams.length) {
-//            case 1:
-//                limit = (Integer) queryParams[0];
-//                break;
-//            case 2:
-//                limit = (Integer) queryParams[0];
-//                offset = (Integer) queryParams[1];
-//                break;
-//        }
-//
-//        Call<UserBlockList> call = userService.getUserBlockList(userId, limit, offset);
-//
-//        Response<UserBlockList> response = call.execute();
-//        ErrorParser.checkForErrors(response);
-//
-//        return response.body();
-//    }
-//
-//    /**
-//     * Blocks a user; blocked user will be added to specific user's block list.
-//     *
-//     * Requires "user_blocks_edit" scope.
-//     *
-//     * @param userId the id of specific user account.
-//     * @param blockId the id of account to block.
-//     */
-//    public UserBlock blockUser(int userId, int blockId) throws IOException, TwitchApiException {
-//        Call<UserBlock> call = userService.blockUser(userId, blockId);
-//
-//        Response<UserBlock> response = call.execute();
-//        ErrorParser.checkForErrors(response);
-//
-//        return response.body();
-//    }
-//
-//    /**
-//     * Unblocks a user; user will be removed from specific user's block list.
-//     *
-//     * Requires "user_blocks_edit" scope.
-//     *
-//     * @param userId the id of specific user account.
-//     * @param unblockId the id of account to unblock.
-//     */
-//    public void unblockUser(int userId, int unblockId) throws IOException, TwitchApiException {
-//        Call<Void> call = userService.unblockUser(userId, unblockId);
-//
-//        call.execute();
-//    }
+    /**
+     * Deletes a specified user from the followers list of a specified channel.
+     *
+     * Requires "user_follows_edit" scope.
+     *
+     * @param userId the id for specific user account.
+     * @param channelId the id for specific channel.
+     */
+    public void unfollowChannel(int userId, int channelId) {
+        webTarget.path("users/" + userId).path("follows/channels/" + channelId).request().delete();
+    }
+
+    /**
+     * Gets a user's block list. List is sorted by recency; newest first.
+     *
+     * Requires "user_blocks_read" scope.
+     *
+     * @param userId the id of specific user account.
+     * @param queryParams optional set of parameters:
+     *        <ul>
+     *            <li>
+     *                limit: sets limit of results. Default: 25 and Max: 100.
+     *            </li>
+     *            <li>
+     *                offset: use for pagination of results. Default: 0.
+     *            </li>
+     *        </ul>
+     */
+    public List<UserBlock> getUserBlockList(int userId, Object... queryParams) throws TwitchApiException {
+        Integer limit = null;
+        Integer offset = null;
+
+        if (queryParams.length > 2) {
+            throw new IllegalArgumentException("Invalid number of optional parameters");
+        }
+
+        switch (queryParams.length) {
+            case 1:
+                limit = (Integer) queryParams[0];
+                break;
+            case 2:
+                limit = (Integer) queryParams[0];
+                offset = (Integer) queryParams[1];
+                break;
+        }
+
+        response = webTarget.path("users/" + userId).path("blocks").queryParam("limit", limit).queryParam("offset", offset)
+                .request().get();
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        parser = new JsonParser();
+        jsonObject = parser.parse(json).getAsJsonObject();
+
+        JsonArray channels = jsonObject.get("blocks").getAsJsonArray();
+        List<UserBlock> blockList = new ArrayList<>();
+
+        for (int i = 0; i < channels.size(); i++) {
+            blockList.add(super.getGson().fromJson(channels.get(i), UserBlock.class));
+        }
+
+        return blockList;
+    }
+
+    /**
+     * Blocks a user; blocked user will be added to specific user's block list.
+     *
+     * Requires "user_blocks_edit" scope.
+     *
+     * @param userId the id of specific user account.
+     * @param blockId the id of account to block.
+     */
+    public UserBlock blockUser(int userId, int blockId) throws TwitchApiException {
+        response = webTarget.path("users/" + userId).path("blocks/" + blockId).request().put(Entity.text(""));
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        return super.getGson().fromJson(json, UserBlock.class);
+    }
+
+    /**
+     * Unblocks a user; user will be removed from specific user's block list.
+     *
+     * Requires "user_blocks_edit" scope.
+     *
+     * @param userId the id of specific user account.
+     * @param unblockId the id of account to unblock.
+     */
+    public void unblockUser(int userId, int unblockId) {
+        webTarget.path("users/" + userId).path("blocks/" + unblockId).request().delete();
+    }
 }

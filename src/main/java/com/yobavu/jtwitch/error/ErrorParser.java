@@ -21,10 +21,10 @@ public final class ErrorParser {
             return null;
         }
 
-        JsonParser parser = new JsonParser();
-        JsonObject jsonObject = parser.parse(response.readEntity(String.class)).getAsJsonObject();
-
         try {
+            JsonParser parser = new JsonParser();
+            JsonObject jsonObject = parser.parse(response.readEntity(String.class)).getAsJsonObject();
+
             return new ApiError(jsonObject.get("status").getAsInt(), jsonObject.get("error").getAsString(),
                     jsonObject.get("message").getAsString());
         } catch (Exception e) {
