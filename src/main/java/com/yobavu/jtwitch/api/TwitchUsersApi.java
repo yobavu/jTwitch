@@ -17,6 +17,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -107,8 +108,8 @@ public class TwitchUsersApi extends TwitchApi {
     }
 
     /**
-     * Check if user is subscribed to a specific channel. Will return null if user is not subscribed to channel
-     * or channel does not have a subscription program.
+     * Check if user is subscribed to a specific channel. Will throw TwitchApiException if user is not subscribed
+     * to channel or channel does not have a subscription program.
      *
      * Requires "user_subscriptions" scope.
      *
@@ -190,36 +191,35 @@ public class TwitchUsersApi extends TwitchApi {
         return followList;
     }
 
-//    /**
-//     * Check if user follows a specific channel. Will return null if user is not following channel.
-//     *
-//     * @param userId the id for specific user account.
-//     * @param channelId the id of channel to check.
-//     */
-//    public UserFollow checkUserFollowsChannel(int userId, int channelId) throws IOException, TwitchApiException {
-//        Call<UserFollow> call = userService.checkUserFollowsChannel(userId, channelId);
-//
-//        Response<UserFollow> response = call.execute();
-//        ErrorParser.checkForErrors(response);
-//
-//        return response.body();
-//    }
-//
-//    /**
-//     * Add user as a follower for a specific channel.
-//     *
-//     * @param userId the id for specific user account.
-//     * @param channelId the id for specific channel to follow.
-//     */
-//    public UserFollow followChannel(int userId, int channelId) throws IOException, TwitchApiException {
-//        Call<UserFollow> call = userService.followChannel(userId, channelId);
-//
-//        Response<UserFollow> response = call.execute();
-//        ErrorParser.checkForErrors(response);
-//
-//        return response.body();
-//    }
-//
+    /**
+     * Check if user follows a specific channel. Will throw TwitchApiException if user is not following channel.
+     *
+     * @param userId the id for specific user account.
+     * @param channelId the id of channel to check.
+     */
+    public UserFollow checkUserFollowsChannel(int userId, int channelId) throws IOException, TwitchApiException {
+        response = webTarget.path("users/" + userId).path("follows/channels/" + channelId).request().get();
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        return super.getGson().fromJson(json, UserFollow.class);
+    }
+
+    /**
+     * Add user as a follower for a specific channel.
+     *
+     * @param userId the id for specific user account.
+     * @param channelId the id for specific channel to follow.
+     */
+    public UserFollow followChannel(int userId, int channelId, boolean notifications) throws IOException, TwitchApiException {
+        response = webTarget.path("users/" + userId).path("follows/channels/" + channelId)
+                .queryParam("notifications", notifications).request().put(Entity.text(""));
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        return super.getGson().fromJson(json, UserFollow.class);
+    }
+
 //    /**
 //     * Deletes a specified user from the followers list of a specified channel.
 //     *
