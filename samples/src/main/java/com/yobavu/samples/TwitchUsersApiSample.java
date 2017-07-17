@@ -63,7 +63,7 @@ public class TwitchUsersApiSample {
         channelsFollowed(usersApi, Integer.parseInt(twitchUserId));
     }
 
-    private static void getUsersByUsername(TwitchUsersApi usersApi) throws Exception {
+    private static void getUsersByUsername(TwitchUsersApi usersApi) throws TwitchApiException {
         // getting user accounts that contains username
         List<User> users = usersApi.getUsersByUsername("testusername");
 
@@ -76,18 +76,14 @@ public class TwitchUsersApiSample {
         }
     }
 
-    private static void userSubscriptionToChannel(TwitchUsersApi usersApi, int userId, int dummyChannelId) throws IOException {
-        try {
-            // exception will occur if not subscribed
-            UserSubscription uSub = usersApi.getUserChannelSubscription(userId, dummyChannelId);
-            System.out.println("Subscribed date: " + uSub.getCreatedAt());
-            System.out.println("Subscribed channel name: " + uSub.getChannel().getName());
-        } catch (TwitchApiException e) {
-            System.err.println(e.getMessage());
-        }
+    private static void userSubscriptionToChannel(TwitchUsersApi usersApi, int userId, int dummyChannelId) throws TwitchApiException {
+        // exception will occur if not subscribed
+        UserSubscription uSub = usersApi.getUserChannelSubscription(userId, dummyChannelId);
+        System.out.println("Subscribed date: " + uSub.getCreatedAt());
+        System.out.println("Subscribed channel name: " + uSub.getChannel().getName());
     }
 
-    private static void channelsFollowed(TwitchUsersApi usersApi, int userId) throws TwitchApiException, IOException {
+    private static void channelsFollowed(TwitchUsersApi usersApi, int userId) throws TwitchApiException {
         List<UserFollow> userFollowList = usersApi.getChannelsFollowedByUser(userId);
 
         System.out.println("User is following:");
