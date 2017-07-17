@@ -254,14 +254,14 @@ public class TwitchUsersApi extends TwitchApi {
             throw new IllegalArgumentException("Invalid number of optional parameters");
         }
 
-        switch (queryParams.length) {
-            case 1:
+        if (queryParams.length > 0) {
+            if (queryParams[0] != null) {
                 limit = (Integer) queryParams[0];
-                break;
-            case 2:
-                limit = (Integer) queryParams[0];
+            }
+
+            if (queryParams[1] != null) {
                 offset = (Integer) queryParams[1];
-                break;
+            }
         }
 
         response = webTarget.path("users/" + userId).path("blocks").queryParam("limit", limit).queryParam("offset", offset)
