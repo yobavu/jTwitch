@@ -45,16 +45,15 @@ TwitchToken twitchToken = oaa.authenticate("sampleUse");
 Create an API wrapper instance:
 ```java
 TwitchFactory factory = new TwitchFactory.Builder()
-    .setClientId(clientId)
-    .setAccessToken(twitchToken.getAccessToken())
-    .build();
+        .setClientId(clientId)
+        .setAccessToken(twitchToken.getAccessToken())
+        .build();
 
-TwitchUsersApi usersApi = (TwitchUsersApi) factory.getInstance(TwitchFactory.API.Users);
+TwitchUsersApi usersApi = factory.getInstance(TwitchUsersApi.class).build(factory.getClient());
 ```
 Execute a request:
 ```java
-// userId is id of user associated with token - in other words, your Twitch account id
-UserFollowList userFollowList = usersApi.getChannelsFollowedByUser(userId);
+List<UserFollow> userFollowList = usersApi.getChannelsFollowedByUser(userId);
 ```
 Examples
 --------
