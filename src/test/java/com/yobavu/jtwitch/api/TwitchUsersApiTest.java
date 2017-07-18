@@ -4,17 +4,17 @@
 
 package com.yobavu.jtwitch.api;
 
+import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.Channel;
 import com.yobavu.jtwitch.model.User;
 import com.yobavu.jtwitch.model.UserBlock;
-import com.yobavu.jtwitch.model.UserBlockList;
 import com.yobavu.jtwitch.model.UserFollow;
-import com.yobavu.jtwitch.model.UserFollowList;
-import com.yobavu.jtwitch.model.UserList;
-import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.UserSubscription;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,13 +22,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-import retrofit2.Response;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class TwitchUsersApiTest {
     private Gson gson;
+    private JsonParser parser;
+    private JsonArray jsonArray;
+    private JsonObject jsonObject;
     private TwitchUsersApi usersApi;
 
     private static final int USER_ID = 1111111;
@@ -44,11 +47,12 @@ public class TwitchUsersApiTest {
     @Before
     public void setup() {
         gson = new Gson();
+        parser = new JsonParser();
         usersApi = Mockito.mock(TwitchUsersApi.class);
     }
 
     @Test
-    public void testGetUserByUsername() throws Exception {
+    public void testGetUsersByUsername() throws Exception {
         final String json = "{" +
                 "\"_total\": 1," +
                 "\"users\": [" +
@@ -62,22 +66,24 @@ public class TwitchUsersApiTest {
                 "       }" +
                 " ]" +
                 "}";
-        Response<UserList> response = Response.success(gson.fromJson(json, UserList.class));
+        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonArray = jsonObject.get("users").getAsJsonArray();
 
-        Mockito.when(usersApi.getUserByUsername("tester")).thenReturn(response.body());
+        List<User> userList = new ArrayList<>();
+        userList.add(gson.fromJson(jsonArray.get(0), User.class));
 
-        final UserList userList = usersApi.getUserByUsername("tester");
-        Assert.assertEquals(userList.getUsers().size(), 1);
-        Assert.assertEquals(1, userList.getTotal());
+        Mockito.when(usersApi.getUsersByUsername("tester")).thenReturn(userList);
 
-        final User user = userList.getUsers().get(0);
+        final List<User> users = usersApi.getUsersByUsername("tester");
+        Assert.assertEquals(users.size(), 1);
+
+        final User user = userList.get(0);
         Assert.assertEquals(1, user.getId());
         Assert.assertEquals("Just a gamer playing games and chatting.", user.getBio());
         Assert.assertThat(user.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
         Assert.assertEquals("tester", user.getDisplayName());
         Assert.assertEquals("tester", user.getName());
         Assert.assertEquals("staff", user.getType());
-
     }
 
     @Test
@@ -91,9 +97,9 @@ public class TwitchUsersApiTest {
                     "\"type\": \"user\"" +
                 "}";
 
-        Response<User> response = Response.success(gson.fromJson(json, User.class));
+        User response = gson.fromJson(json, User.class);
 
-        Mockito.when(usersApi.getUserById(USER_ID)).thenReturn(response.body());
+        Mockito.when(usersApi.getUserById(USER_ID)).thenReturn(response);
 
         final User user = usersApi.getUserById(USER_ID);
         Assert.assertEquals(USER_ID, user.getId());
@@ -144,9 +150,9 @@ public class TwitchUsersApiTest {
                 "    \"created_at\": \"2017-04-08T19:54:24Z\"" +
                 "}";
 
-        Response<UserSubscription> response = Response.success(gson.fromJson(json, UserSubscription.class));
+        UserSubscription response = gson.fromJson(json, UserSubscription.class);
 
-        Mockito.when(usersApi.getUserChannelSubscription(USER_ID, CHANNEL_SUBSCRIBED)).thenReturn(response.body());
+        Mockito.when(usersApi.getUserChannelSubscription(USER_ID, CHANNEL_SUBSCRIBED)).thenReturn(response);
 
         final UserSubscription subscription = usersApi.getUserChannelSubscription(USER_ID, CHANNEL_SUBSCRIBED);
         Assert.assertEquals("ac2f1248993eaf97e71721458bd88aae66c92330", subscription.getId());
@@ -224,17 +230,21 @@ public class TwitchUsersApiTest {
                 "   ]" +
                 "}";
 
-        Response<UserFollowList> response = Response.success(gson.fromJson(json, UserFollowList.class));
+        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonArray = jsonObject.get("follows").getAsJsonArray();
 
-        Mockito.when(usersApi.getChannelsFollowedByUser(USER_ID)).thenReturn(response.body());
+        List<UserFollow> response = new ArrayList<>();
 
-        final UserFollowList follows = usersApi.getChannelsFollowedByUser(USER_ID);
-        Assert.assertEquals(2, follows.getTotal());
+        for (int i = 0; i < jsonArray.size(); i++) {
+            response.add(gson.fromJson(jsonArray.get(i), UserFollow.class));
+        }
 
-        final List<UserFollow> followList = follows.getFollows();
-        Assert.assertEquals(2, followList.size());
+        Mockito.when(usersApi.getChannelsFollowedByUser(USER_ID)).thenReturn(response);
 
-        final UserFollow follow1 = followList.get(0);
+        final List<UserFollow> follows = usersApi.getChannelsFollowedByUser(USER_ID);
+        Assert.assertEquals(2, follows.size());
+
+        final UserFollow follow1 = follows.get(0);
         Assert.assertThat(follow1.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
         Assert.assertFalse(follow1.getNotifications());
         Assert.assertThat(follow1.getChannel(), IsInstanceOf.instanceOf(Channel.class));
@@ -244,7 +254,7 @@ public class TwitchUsersApiTest {
         Assert.assertEquals("en", channel1.getBroadcasterLanguage());
         Assert.assertThat(channel1.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
 
-        final UserFollow follow2 = followList.get(1);
+        final UserFollow follow2 = follows.get(1);
         final Channel channel2 = follow2.getChannel();
         Assert.assertNotEquals(channel1.getId(), channel2.getId());
     }
@@ -286,11 +296,11 @@ public class TwitchUsersApiTest {
                 "   \"notifications\": false" +
                 "}";
 
-        Response<UserFollow> response = Response.success(gson.fromJson(json, UserFollow.class));
+        UserFollow response = gson.fromJson(json, UserFollow.class);
 
-        Mockito.when(usersApi.followChannel(USER_ID, CHANNEL_TO_FOLLOW)).thenReturn(response.body());
+        Mockito.when(usersApi.followChannel(USER_ID, CHANNEL_TO_FOLLOW, true)).thenReturn(response);
 
-        final UserFollow follow = usersApi.followChannel(USER_ID, CHANNEL_TO_FOLLOW);
+        final UserFollow follow = usersApi.followChannel(USER_ID, CHANNEL_TO_FOLLOW, true);
         Assert.assertThat(follow.getCreatedAt(), IsInstanceOf.instanceOf(Date.class));
         Assert.assertFalse(follow.getNotifications());
 
@@ -320,15 +330,21 @@ public class TwitchUsersApiTest {
                 "   ]" +
                 "}";
 
-        Response<UserBlockList> response = Response.success(gson.fromJson(json, UserBlockList.class));
+        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonArray = jsonObject.get("blocks").getAsJsonArray();
 
-        Mockito.when(usersApi.getUserBlockList(USER_ID)).thenReturn(response.body());
+        List<UserBlock> response = new ArrayList<>();
 
-        final UserBlockList userBlockList = usersApi.getUserBlockList(USER_ID);
-        Assert.assertEquals(1, userBlockList.getTotal());
-        Assert.assertEquals(1, userBlockList.getBlocks().size());
+        for (int i = 0; i < jsonArray.size(); i++) {
+            response.add(gson.fromJson(jsonArray.get(i), UserBlock.class));
+        }
 
-        final UserBlock blocked = userBlockList.getBlocks().get(0);
+        Mockito.when(usersApi.getUserBlockList(USER_ID)).thenReturn(response);
+
+        List<UserBlock> userBlockList = usersApi.getUserBlockList(USER_ID);
+        Assert.assertEquals(1, userBlockList.size());
+
+        final UserBlock blocked = userBlockList.get(0);
         Assert.assertEquals(34105660, blocked.getId());
 
         final User blockedUser = blocked.getBlockedUser();
@@ -353,9 +369,9 @@ public class TwitchUsersApiTest {
                 "   }" +
                 "}";
 
-        Response<UserBlock> response = Response.success(gson.fromJson(json, UserBlock.class));
+        UserBlock response = gson.fromJson(json, UserBlock.class);
 
-        Mockito.when(usersApi.blockUser(USER_ID, USER_TO_BLOCK)).thenReturn(response.body());
+        Mockito.when(usersApi.blockUser(USER_ID, USER_TO_BLOCK)).thenReturn(response);
 
         final UserBlock userBlock = usersApi.blockUser(USER_ID, USER_TO_BLOCK);
         Assert.assertEquals(34105628, userBlock.getId());
