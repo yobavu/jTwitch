@@ -6,33 +6,34 @@ package com.yobavu.jtwitch.api;
 
 import com.yobavu.jtwitch.error.ErrorParser;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
-import com.yobavu.jtwitch.model.FollowedVideos;
 import com.yobavu.jtwitch.model.Video;
-import com.yobavu.jtwitch.model.TopVideos;
-import com.yobavu.jtwitch.services.VideoService;
-import okhttp3.OkHttpClient;
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.io.IOException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Wrapper for the Twitch videos API.
  */
 public class TwitchVideosApi extends TwitchApi {
-    private VideoService videoService;
+    private WebTarget webTarget;
+    private Response response;
+    private JsonParser parser;
+    private JsonObject jsonObject;
 
-    public TwitchVideosApi(OkHttpClient.Builder clientBuilder) {
+    public TwitchVideosApi() {
         super();
-        videoService = new Retrofit.Builder()
-                .baseUrl(super.getApiUrl())
-                .addConverterFactory(GsonConverterFactory.create(super.gson))
-                .client(clientBuilder.build())
-                .build()
-                .create(VideoService.class);
+    }
+
+    public TwitchVideosApi build(Client client) {
+        this.webTarget = client.target(super.getApiUrl());
+        return this;
     }
 
     /**
@@ -40,13 +41,12 @@ public class TwitchVideosApi extends TwitchApi {
      *
      * @param videoId the id for video.
      */
-    public Video getVideoById(int videoId) throws IOException, TwitchApiException {
-        Call<Video> call = videoService.getVideoById(videoId);
-
-        Response<Video> response = call.execute();
+    public Video getVideoById(int videoId) throws TwitchApiException {
+        response = webTarget.path("videos/" + videoId).request(MediaType.APPLICATION_JSON_TYPE).get();
         ErrorParser.checkForErrors(response);
 
-        return response.body();
+        String json = response.readEntity(String.class);
+        return super.getGson().fromJson(json, Video.class);
     }
 
     /**
@@ -86,7 +86,7 @@ public class TwitchVideosApi extends TwitchApi {
      *            </li>
      *        </ul>
      */
-    public TopVideos getTopVideos(Object... queryParams) throws IOException, TwitchApiException {
+    public List<Video> getTopVideos(Object... queryParams) throws TwitchApiException {
         Integer limit = null;
         Integer offset = null;
         String game = null;
@@ -156,12 +156,23 @@ public class TwitchVideosApi extends TwitchApi {
             }
         }
 
-        Call<TopVideos> call = videoService.getTopVideos(limit, offset, game, period, broadcastType, language, sort);
-
-        Response<TopVideos> response = call.execute();
+        response = webTarget.path("videos/top").queryParam("limit", limit).queryParam("offset", offset)
+                    .queryParam("game", game).queryParam("period", period).queryParam("broadcast_type", broadcastType)
+                    .queryParam("language", language).queryParam("sort", sort).request().get();
         ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
 
-        return response.body();
+        parser = new JsonParser();
+        jsonObject = parser.parse(json).getAsJsonObject();
+
+        JsonArray videos = jsonObject.get("vods").getAsJsonArray();
+        List<Video> videoList = new ArrayList<>();
+
+        for (int i = 0; i < videos.size(); i++) {
+            videoList.add(super.getGson().fromJson(videos.get(i), Video.class));
+        }
+
+        return videoList;
     }
 
     /**
@@ -197,11 +208,11 @@ public class TwitchVideosApi extends TwitchApi {
      *            </li>
      *        </ul>
      */
-    public FollowedVideos getFollowedVideos(Object... queryParams) throws IOException, TwitchApiException {
+    public List<Video> getFollowedVideos(Object... queryParams) throws TwitchApiException {
         Integer limit = null;
         Integer offset = null;
         String broadcastType = null;
-        String languages = null;
+        String language = null;
         String sort = null;
 
         List<String> broadcastTypeList;
@@ -248,7 +259,7 @@ public class TwitchVideosApi extends TwitchApi {
                 }
 
                 sb.deleteCharAt(sb.length() - 1);
-                languages = sb.toString();
+                language = sb.toString();
 
                 sb.setLength(0);
             }
@@ -258,12 +269,23 @@ public class TwitchVideosApi extends TwitchApi {
             }
         }
 
-        Call<FollowedVideos> call = videoService.getFollowedVideos(limit, offset, broadcastType, languages, sort);
-
-        Response<FollowedVideos> response = call.execute();
+        response = webTarget.path("videos/followed").queryParam("limit", limit).queryParam("offset", offset)
+                .queryParam("broadcast_type", broadcastType).queryParam("language", language)
+                .queryParam("sort", sort).request().get();
         ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
 
-        return response.body();
+        parser = new JsonParser();
+        jsonObject = parser.parse(json).getAsJsonObject();
+
+        JsonArray videos = jsonObject.get("videos").getAsJsonArray();
+        List<Video> videoList = new ArrayList<>();
+
+        for (int i = 0; i < videos.size(); i++) {
+            videoList.add(super.getGson().fromJson(videos.get(i), Video.class));
+        }
+
+        return videoList;
     }
 
     /**
@@ -295,7 +317,7 @@ public class TwitchVideosApi extends TwitchApi {
      *            </li>
      *        </ul>
      */
-    public Call<Void> createVideo(int channelId, String videoTitle, Object... queryParams) throws IOException, TwitchApiException {
+    public void createVideo(int channelId, String videoTitle, Object... queryParams) throws TwitchApiException {
         //
     }
 }
