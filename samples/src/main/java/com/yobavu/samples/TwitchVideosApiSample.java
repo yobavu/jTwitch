@@ -14,6 +14,7 @@ import com.yobavu.jtwitch.util.TwitchScope;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -28,10 +29,13 @@ public class TwitchVideosApiSample {
         final String clientId = prop.getProperty("twitch.clientId");
         final String clientSecret = prop.getProperty("twitch.clientSecret");
 
+        final int dummyVideoId = 106400740;
+
         List<TwitchScope.SCOPES> scopes = new ArrayList<>();
         scopes.add(TwitchScope.SCOPES.USER_READ);
         scopes.add(TwitchScope.SCOPES.USER_SUBSCRIPTION);
         scopes.add(TwitchScope.SCOPES.USER_FOLLOWS_EDIT);
+        scopes.add(TwitchScope.SCOPES.CHANNEL_EDITOR);
 
         OAuth2Authenticate oaa = new OAuth2Authenticate(clientId, clientSecret, redirectUri, scopes);
 
@@ -44,7 +48,7 @@ public class TwitchVideosApiSample {
 
         System.out.println("========== Making VIDEOS API request ==========");
 
-        Video video = videosApi.getVideoById(145467223);
+        Video video = videosApi.getVideoById(dummyVideoId);
         System.out.println("Channel video belongs to: " + video.getChannel().getDisplayName());
 
         System.out.println("Videos from followed channels");
@@ -53,5 +57,11 @@ public class TwitchVideosApiSample {
         for (Video v: vids) {
             System.out.println("Title: " + v.getTitle());
         }
+
+        System.out.println("Creating and uploading video");
+        Map<String, String> response = videosApi.createVideo(151146757, "Test video", null, null, null, null,
+                TwitchVideosApi.VIEWABLE.PUBLIC, null);
+
+        videosApi.uploadVideo(response.get("videoId"), "/Users/bvu/Downloads/Volans.mp4", response.get("token"));
     }
 }

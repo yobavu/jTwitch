@@ -12,11 +12,21 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Wrapper for the Twitch videos API.
@@ -26,6 +36,16 @@ public class TwitchVideosApi extends TwitchApi {
     private Response response;
     private JsonParser parser;
     private JsonObject jsonObject;
+
+    public enum VIEWABLE {
+        PRIVATE("private"), PUBLIC("public");
+
+        String value;
+
+        VIEWABLE(String value) {
+            this.value = value;
+        }
+    }
 
     public TwitchVideosApi() {
         super();
@@ -42,7 +62,7 @@ public class TwitchVideosApi extends TwitchApi {
      * @param videoId the id for video.
      */
     public Video getVideoById(int videoId) throws TwitchApiException {
-        response = webTarget.path("videos/" + videoId).request(MediaType.APPLICATION_JSON_TYPE).get();
+        response = webTarget.path("videos/" + videoId).request().get();
         ErrorParser.checkForErrors(response);
 
         String json = response.readEntity(String.class);
@@ -295,29 +315,75 @@ public class TwitchVideosApi extends TwitchApi {
      *
      * @param channelId the id of channel.
      * @param videoTitle the title of video.
-     * @param queryParams optional set of parameters:
-     *        <ul>
-     *            <li>
-     *                desc: description of video.
-     *            </li>
-     *            <li>
-     *                game: name of game in video.
-     *            </li>
-     *            <li>
-     *                language: language of video. Example values: en, es.
-     *            </li>
-     *            <li>
-     *                tagList: tags describing the video. Max 100 char for a tag, 500 char total. Example values: walkthrough,shooter.
-     *            </li>
-     *            <li>
-     *                viewable: specifies who can view video. Valid values: public, private. Default: public.
-     *            </li>
-     *            <li>
-     *                viewableAt: date when video becomes public. Only applies if viewable=private.
-     *            </li>
-     *        </ul>
+     *
+     * @param description optional description of video.
+     * @param game optional name of game in video.
+     * @param language optional language(s) of video. Example values: en, es.
+     * @param tagList optional tag(s) describing the video. Max 100 char for a tag, 500 char total. Example values: walkthrough,shooter.
+     * @param viewable optional specifies who can view video. Valid values: public, private. Default: public.
+     * @param viewableAt optional date when video becomes public. Only applies if viewable=private.
      */
-    public void createVideo(int channelId, String videoTitle, Object... queryParams) throws TwitchApiException {
-        //
+    public Map<String, String> createVideo(int channelId, String videoTitle, String description, String game,
+                                           List<String> language, List<String> tagList, VIEWABLE viewable,
+                                           Date viewableAt) throws TwitchApiException {
+        if (viewable == null) {
+            viewable = VIEWABLE.PUBLIC;
+        }
+
+        response = webTarget.path("videos").queryParam("channel_id", channelId).queryParam("title", videoTitle)
+                    .queryParam("description", description).queryParam("game", game).queryParam("language", language)
+                    .queryParam("tag_list", tagList).queryParam("viewable", viewable.value).queryParam("viewable_at", viewableAt)
+                    .request().post(Entity.text(""));
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        parser = new JsonParser();
+        jsonObject = parser.parse(json).getAsJsonObject();
+
+        Video video = super.getGson().fromJson(jsonObject.get("video"), Video.class);
+
+        Map<String, String> data = new HashMap<>();
+        data.put("token", jsonObject.get("upload").getAsJsonObject().get("token").getAsString());
+        data.put("url", jsonObject.get("upload").getAsJsonObject().get("url").getAsString());
+        data.put("videoId", video.getId());
+
+        return data;
+    }
+
+    /**
+     * Upload video to twitch. This method works in two parts:
+     *
+     *  1. Upload video in parts. Each video part except the last part must be at least 5 MB and at most 25 MB.
+     *  2. Complete upload once all parts have been uploaded.
+     *
+     * @param videoId the id of video. Id can be obtained by calling {@createVideo()} beforehand.
+     * @param filePath the path to video file.
+     * @param uploadToken the upload token to use. Token can be obtained by calling {@createVideo()} beforehand.
+     */
+    public void uploadVideo(String videoId, String filePath, String uploadToken) throws IOException, TwitchApiException {
+        // set upload chunksize to 10MB
+        int chunkSize = 10 * 1024 * 1024;
+        // index the video part
+        int index = 1, data = 0;
+
+        File videoFile = new File(filePath);
+        // read in file by chunks
+        FileInputStream is = new FileInputStream(videoFile);
+        byte[] chunk = new byte[chunkSize];
+
+        // read() returns -1 when end of file
+        while ((data = is.read(chunk)) != -1) {
+            response = webTarget.path("upload/" + videoId).queryParam("part", index).queryParam("upload_token", uploadToken)
+                        .request(MediaType.APPLICATION_OCTET_STREAM).header("Content-Length", chunkSize)
+                        .put(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
+            ErrorParser.checkForErrors(response);
+            index++;
+        }
+
+        // complete video upload
+        response = webTarget.path("upload/" + videoId).path("complete").queryParam("upload_token", uploadToken).request().post(Entity.text(""));
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+        System.out.println();
     }
 }

@@ -95,6 +95,7 @@ public class OAuth2Authenticate {
                 System.err.println("Please open the following URL in your browser:  " + authCodeFlowUrl);
             }
 
+            // todo close browser after getting code
             String authorizationCode = getAuthorizationCode();
 
             OAuthClientRequest request = OAuthClientRequest
