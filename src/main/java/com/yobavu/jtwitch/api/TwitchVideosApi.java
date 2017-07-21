@@ -382,6 +382,8 @@ public class TwitchVideosApi extends TwitchApi {
             index++;
         }
 
+        is.close();
+
         // complete video upload
         response = uploadWebTarget.path("upload/" + videoId).path("complete").queryParam("upload_token", uploadToken).request().post(Entity.text(""));
         ErrorParser.checkForErrors(response);
