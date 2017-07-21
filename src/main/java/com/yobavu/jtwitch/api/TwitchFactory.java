@@ -5,8 +5,8 @@
 package com.yobavu.jtwitch.api;
 
 import com.yobavu.jtwitch.oauth.OAuth2Authenticator;
-import org.glassfish.jersey.client.ClientConfig;
 
+import org.glassfish.jersey.client.ClientConfig;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 

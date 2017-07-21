@@ -37,6 +37,7 @@ public class TwitchUsersApi extends TwitchApi {
     }
 
     public TwitchUsersApi build(Client client) {
+        super.setClient(client);
         webTarget = client.target(super.getApiUrl());
         return this;
     }
