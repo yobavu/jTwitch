@@ -30,6 +30,7 @@ public class TwitchVideosApiSample {
         final String clientSecret = prop.getProperty("twitch.clientSecret");
 
         final int dummyVideoId = 106400740;
+        final int dummyChannelId = 123084353;
 
         List<TwitchScope.SCOPES> scopes = new ArrayList<>();
         scopes.add(TwitchScope.SCOPES.USER_READ);
@@ -59,9 +60,9 @@ public class TwitchVideosApiSample {
         }
 
         System.out.println("Creating and uploading video");
-        Map<String, String> response = videosApi.createVideo(151146757, "Test video", null, null, null, null,
+        Map<String, String> response = videosApi.createVideo(dummyChannelId, "TestVideo", null, null, null, null,
                 TwitchVideosApi.VIEWABLE.PUBLIC, null);
 
-        videosApi.uploadVideo(response.get("videoId"), "/Users/bvu/Downloads/Volans.mp4", response.get("token"));
+        videosApi.uploadVideo(response.get("videoId"), "test.mp4", response.get("token"));
     }
 }

@@ -19,9 +19,6 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,7 +49,8 @@ public class TwitchVideosApi extends TwitchApi {
     }
 
     public TwitchVideosApi build(Client client) {
-        this.webTarget = client.target(super.getApiUrl());
+        super.setClient(client);
+        webTarget = client.target(super.getApiUrl());
         return this;
     }
 
@@ -356,34 +354,36 @@ public class TwitchVideosApi extends TwitchApi {
      *  1. Upload video in parts. Each video part except the last part must be at least 5 MB and at most 25 MB.
      *  2. Complete upload once all parts have been uploaded.
      *
-     * @param videoId the id of video. Id can be obtained by calling {@createVideo()} beforehand.
+     * @param videoId the id of video. Id can be obtained by calling {@link #createVideo} beforehand.
      * @param filePath the path to video file.
-     * @param uploadToken the upload token to use. Token can be obtained by calling {@createVideo()} beforehand.
+     * @param uploadToken the upload token to use. Token can be obtained by calling {@link #createVideo} beforehand.
      */
     public void uploadVideo(String videoId, String filePath, String uploadToken) throws IOException, TwitchApiException {
         // set upload chunksize to 10MB
         int chunkSize = 10 * 1024 * 1024;
         // index the video part
-        int index = 1, data = 0;
+        int index = 1, bytesRead = 0;
 
         File videoFile = new File(filePath);
         // read in file by chunks
         FileInputStream is = new FileInputStream(videoFile);
-        byte[] chunk = new byte[chunkSize];
+        byte[] data = new byte[chunkSize];
+
+        WebTarget uploadWebTarget = super.getClient().target("https://uploads.twitch.tv/");
 
         // read() returns -1 when end of file
-        while ((data = is.read(chunk)) != -1) {
-            response = webTarget.path("upload/" + videoId).queryParam("part", index).queryParam("upload_token", uploadToken)
-                        .request(MediaType.APPLICATION_OCTET_STREAM).header("Content-Length", chunkSize)
+        while ((bytesRead = is.read(data)) != -1) {
+            // need to set target to uploads.api http
+            response = uploadWebTarget.path("upload/" + videoId).queryParam("part", index).queryParam("upload_token", uploadToken)
+                        .request()
+                        .header("Content-Length", chunkSize)
                         .put(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
             ErrorParser.checkForErrors(response);
             index++;
         }
 
         // complete video upload
-        response = webTarget.path("upload/" + videoId).path("complete").queryParam("upload_token", uploadToken).request().post(Entity.text(""));
+        response = uploadWebTarget.path("upload/" + videoId).path("complete").queryParam("upload_token", uploadToken).request().post(Entity.text(""));
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
-        System.out.println();
     }
 }
