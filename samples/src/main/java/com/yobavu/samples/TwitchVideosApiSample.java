@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Sample showing how to make requests to the User endpoints.
+ * Sample showing how to make requests to the Video endpoints.
  */
 public class TwitchVideosApiSample {
     public static void main(String[] args) throws Exception {

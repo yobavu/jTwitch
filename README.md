@@ -31,7 +31,7 @@ Twitch API checklist:
  - Streams
  - Teams
  - ~~Users~~
- - Videos (in progress)
+ - ~~Videos~~
 
 Usage
 -----
