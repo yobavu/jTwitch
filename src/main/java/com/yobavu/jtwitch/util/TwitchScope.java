@@ -12,7 +12,7 @@ import java.util.List;
 public final class TwitchScope {
     public enum SCOPES {
         USER_READ("user_read"), USER_SUBSCRIPTION("user_subscriptions"), USER_FOLLOWS_EDIT("user_follows_edit"),
-        USER_BLOCKS_READ("user_blocks_read"), USER_BLOCKS_EDIT("user_blocks_edit");
+        USER_BLOCKS_READ("user_blocks_read"), USER_BLOCKS_EDIT("user_blocks_edit"), CHANNEL_EDITOR("channel_editor");
 
         String value;
 

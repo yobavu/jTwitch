@@ -6,6 +6,8 @@ package com.yobavu.jtwitch.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 /**
  * Block record for a Twitch user.
  */
@@ -14,7 +16,7 @@ public class UserBlock {
     private int id;
 
     @SerializedName("updated_at")
-    private String updatedAt;
+    private Date updatedAt;
 
     @SerializedName("user")
     private User blockedUser;
@@ -29,7 +31,7 @@ public class UserBlock {
     /**
      * Gets updated date of block record.
      */
-    public String getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 

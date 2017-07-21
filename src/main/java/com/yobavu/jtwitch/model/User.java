@@ -6,6 +6,8 @@ package com.yobavu.jtwitch.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 /**
  * A Twitch user.
  */
@@ -17,7 +19,7 @@ public class User {
     private String bio;
 
     @SerializedName("created_at")
-    private String createdAt;
+    private Date createdAt;
 
     @SerializedName("display_name")
     private String displayName;
@@ -47,7 +49,7 @@ public class User {
     private String type;
 
     @SerializedName("updated_at")
-    private String updatedAt;
+    private Date updatedAt;
 
     /**
      * Gets user's id.
@@ -66,7 +68,7 @@ public class User {
     /**
      * Gets user's account creation date.
      */
-    public String getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
@@ -136,7 +138,7 @@ public class User {
     /**
      * Gets date when user's account was last updated.
      */
-    public String getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 

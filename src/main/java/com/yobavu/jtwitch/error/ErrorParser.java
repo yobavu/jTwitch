@@ -4,11 +4,11 @@
 
 package com.yobavu.jtwitch.error;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import retrofit2.Response;
+import com.yobavu.jtwitch.exceptions.TwitchApiException;
 
-import java.io.IOException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import javax.ws.rs.core.Response;
 
 /**
  * Parses a response to check for errors.
@@ -16,18 +16,40 @@ import java.io.IOException;
 public final class ErrorParser {
     private ErrorParser() {}
 
-    public static ApiError parseError(Response<?> response) {
-        if (response.isSuccessful()) {
+    private static ApiError parseError(Response response) {
+        if (response.getStatus() == 200) {
             return null;
         }
 
         try {
-            Moshi moshi = new Moshi.Builder().build();
-            JsonAdapter<ApiError> apiErrorJsonAdapter = moshi.adapter(ApiError.class);
+            JsonParser parser = new JsonParser();
+            JsonObject jsonObject = parser.parse(response.readEntity(String.class)).getAsJsonObject();
 
-            return apiErrorJsonAdapter.fromJson(response.errorBody().string());
-        } catch (IOException io) {
-            return new ApiError(response.code(), null, "Unknown error");
+            return new ApiError(jsonObject.get("status").getAsInt(), jsonObject.get("error").getAsString(),
+                    jsonObject.get("message").getAsString());
+        } catch (Exception e) {
+            return new ApiError(500, e.getMessage(), null);
+        }
+    }
+
+    /**
+     * Parses response and handle errors if present.
+     *
+     * @param response the response from service.
+     */
+    public static void checkForErrors(Response response) throws TwitchApiException {
+        ApiError apiError = parseError(response);
+
+        if (apiError != null) {
+            StringBuilder sb = new StringBuilder();
+
+            sb.append(apiError.getStatusCode());
+            sb.append(" ");
+            sb.append(apiError.getError());
+            sb.append(": ");
+            sb.append(apiError.getMessage());
+
+            throw new TwitchApiException(sb.toString());
         }
     }
 }

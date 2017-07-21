@@ -4,21 +4,19 @@
 
 package com.yobavu.jtwitch.api;
 
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import com.yobavu.jtwitch.oauth.OAuth2Authenticator;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import org.glassfish.jersey.client.ClientConfig;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 
 /**
  * Factory for Twitch API.
  */
 public final class TwitchFactory {
-    public enum API { Users }
+    private Client client;
 
-    private Map<API, Object> factory;
+    private static final String TWITCH_API_VERSION = "application/vnd.twitchtv.v5+json";
 
     /**
      * Builder for {@link TwitchFactory}.
@@ -26,12 +24,10 @@ public final class TwitchFactory {
     public static class Builder {
         String clientId;
         String accessToken;
-        Map<API, Object> factory;
-        OkHttpClient.Builder clientBuilder;
+        Client client;
 
         public Builder() {
-            this.factory = new HashMap<>();
-            this.clientBuilder = new OkHttpClient().newBuilder();
+            this.client = ClientBuilder.newClient(new ClientConfig());
         }
 
         public Builder setClientId(String clientId) {
@@ -45,32 +41,23 @@ public final class TwitchFactory {
         }
 
         /**
-         * Application interceptor is used for adding request headers to each response.
+         * Set headers for each request.
          */
         public TwitchFactory build() {
-            clientBuilder.addInterceptor(new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    Request request = chain.request().newBuilder()
-                            .addHeader("Accept", "application/vnd.twitchtv.v5+json")
-                            .addHeader("Client-ID", clientId)
-                            .addHeader("Authorization", "OAuth " + accessToken)
-                            .build();
-                    return chain.proceed(request);
-                }
-            });
-
-            factory.put(API.Users, new TwitchUsersApi(clientBuilder));
-
-            return new TwitchFactory(this.factory);
+            client.register(new OAuth2Authenticator(TWITCH_API_VERSION, clientId, accessToken));
+            return new TwitchFactory(client);
         }
     }
 
-    private TwitchFactory(Map<API, Object> factory) {
-        this.factory = factory;
+    private TwitchFactory(Client client) {
+        this.client = client;
     }
 
-    public Object getInstance(API type) {
-        return factory.get(type);
+    public <T> T getInstance(Class<T> c) throws IllegalAccessException, InstantiationException {
+        return c.newInstance();
+    }
+
+    public Client getClient() {
+        return client;
     }
 }

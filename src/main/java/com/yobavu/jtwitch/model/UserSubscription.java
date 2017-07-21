@@ -6,6 +6,8 @@ package com.yobavu.jtwitch.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 /**
  * Twitch user's subscription.
  */
@@ -23,7 +25,7 @@ public class UserSubscription {
     private Channel channel;
 
     @SerializedName("created_at")
-    private String createdAt;
+    private Date createdAt;
 
     /**
      * Gets subscription id.
@@ -56,7 +58,7 @@ public class UserSubscription {
     /**
      * Gets date subscription was created on.
      */
-    public String getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 }

@@ -6,6 +6,8 @@ package com.yobavu.jtwitch.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 /**
  * A Twitch channel.
  */
@@ -17,7 +19,7 @@ public class Channel {
     private String broadcasterLanguage;
 
     @SerializedName("created_at")
-    private String createdAt;
+    private Date createdAt;
 
     @SerializedName("display_name")
     private String displayName;
@@ -53,7 +55,7 @@ public class Channel {
     private String status;
 
     @SerializedName("updated_at")
-    private String updatedAt;
+    private Date updatedAt;
 
     @SerializedName("url")
     private String url;
@@ -81,7 +83,7 @@ public class Channel {
     /**
      * Gets channel creation date.
      */
-    public String getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
@@ -165,7 +167,7 @@ public class Channel {
     /**
      * Gets date of when channel was last updated.
      */
-    public String getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 
