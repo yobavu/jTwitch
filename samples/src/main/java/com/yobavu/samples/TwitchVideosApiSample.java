@@ -61,7 +61,7 @@ public class TwitchVideosApiSample {
 
         System.out.println("Creating and uploading video");
         Map<String, String> response = videosApi.createVideo(dummyChannelId, "TestVideo", null, null, null, null,
-                TwitchVideosApi.VIEWABLE.PUBLIC, null);
+                TwitchVideosApi.VIEWABLE.PRIVATE, null);
 
         videosApi.uploadVideo(response.get("videoId"), "test.mp4", response.get("token"));
     }

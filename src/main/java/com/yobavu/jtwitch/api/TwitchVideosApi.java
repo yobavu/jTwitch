@@ -324,13 +324,35 @@ public class TwitchVideosApi extends TwitchApi {
     public Map<String, String> createVideo(int channelId, String videoTitle, String description, String game,
                                            List<String> language, List<String> tagList, VIEWABLE viewable,
                                            Date viewableAt) throws TwitchApiException {
+        String tags = "", languages = "";
+        StringBuilder sb = new StringBuilder();
+
         if (viewable == null) {
             viewable = VIEWABLE.PUBLIC;
         }
 
+        if (language != null) {
+            for (String lang : language) {
+                sb.append(lang);
+                sb.append(",");
+            }
+
+            languages = sb.deleteCharAt(sb.length() - 1).toString();
+            sb.setLength(0);
+        }
+
+        if (tagList != null) {
+            for (String tag : tagList) {
+                sb.append(tag);
+                sb.append(",");
+            }
+
+            tags = sb.deleteCharAt(sb.length() - 1).toString();
+        }
+
         response = webTarget.path("videos").queryParam("channel_id", channelId).queryParam("title", videoTitle)
-                    .queryParam("description", description).queryParam("game", game).queryParam("language", language)
-                    .queryParam("tag_list", tagList).queryParam("viewable", viewable.value).queryParam("viewable_at", viewableAt)
+                    .queryParam("description", description).queryParam("game", game).queryParam("language", languages)
+                    .queryParam("tag_list", tags).queryParam("viewable", viewable.value).queryParam("viewable_at", viewableAt)
                     .request().post(Entity.text(""));
         ErrorParser.checkForErrors(response);
         String json = response.readEntity(String.class);
@@ -372,6 +394,7 @@ public class TwitchVideosApi extends TwitchApi {
         WebTarget uploadWebTarget = super.getClient().target("https://uploads.twitch.tv/");
 
         // read() returns -1 when end of file
+        // todo make this async?
         while ((bytesRead = is.read(data)) != -1) {
             // need to set target to uploads.api http
             response = uploadWebTarget.path("upload/" + videoId).queryParam("part", index).queryParam("upload_token", uploadToken)
@@ -386,6 +409,66 @@ public class TwitchVideosApi extends TwitchApi {
 
         // complete video upload
         response = uploadWebTarget.path("upload/" + videoId).path("complete").queryParam("upload_token", uploadToken).request().post(Entity.text(""));
+        ErrorParser.checkForErrors(response);
+    }
+
+    /**
+     * Updates information about a specific video that was already created.
+     *
+     * Requires "channel_editor" scope.
+     *
+     * @param videoId the id of video.
+     * @param videoTitle the title of video. Max of 100 char.
+     *
+     * @param description optional short description of video.
+     * @param game optional name of game in video.
+     * @param language optional language(s) of video. Example values: en, es.
+     * @param tagList optional tag(s) describing the video. Max 100 char for a tag, 500 char total. Example values: walkthrough,shooter.
+     */
+    public Video updateVideo(String videoId, String videoTitle, String description, String game,
+                             List<String> language, List<String> tagList) throws TwitchApiException {
+        String tags = "", languages = "";
+        StringBuilder sb = new StringBuilder();
+
+        if (language != null) {
+            for (String lang : language) {
+                sb.append(lang);
+                sb.append(",");
+            }
+
+            languages = sb.deleteCharAt(sb.length() - 1).toString();
+            sb.setLength(0);
+        }
+
+        if (tagList != null) {
+            for (String tag : tagList) {
+                sb.append(tag);
+                sb.append(",");
+            }
+
+            tags = sb.deleteCharAt(sb.length() - 1).toString();
+        }
+
+        // substring used because videoId is in format: v########...
+        // so strip out the first letter
+        response = webTarget.path("videos/" + videoId.substring(1)).queryParam("title", videoTitle).queryParam("description", description)
+                    .queryParam("game", game).queryParam("language", languages).queryParam("tag_list", tags)
+                    .request().put(Entity.text(""));
+        ErrorParser.checkForErrors(response);
+        String json = response.readEntity(String.class);
+
+        return super.getGson().fromJson(json, Video.class);
+    }
+
+    /**
+     * Deletes a specified video.
+     *
+     * Requires "channel_editor" scope.
+     *
+     * @param videoId the id of video.
+     */
+    public void deleteVideo(String videoId) throws TwitchApiException {
+        response = webTarget.path("videos/" + videoId.substring(1)).request().delete();
         ErrorParser.checkForErrors(response);
     }
 }
