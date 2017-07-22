@@ -15,7 +15,6 @@ import com.yobavu.jtwitch.oauth.TwitchToken;
 import com.yobavu.jtwitch.util.TwitchScope;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;

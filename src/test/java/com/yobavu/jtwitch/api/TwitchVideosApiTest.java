@@ -4,11 +4,13 @@
 
 package com.yobavu.jtwitch.api;
 
-import com.google.gson.Gson;
 import com.yobavu.jtwitch.model.Channel;
-import com.yobavu.jtwitch.model.FollowedVideos;
 import com.yobavu.jtwitch.model.Video;
-import com.yobavu.jtwitch.model.TopVideos;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.Gson;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,13 +18,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
-import retrofit2.Response;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class TwitchVideosApiTest {
     private Gson gson;
+    private JsonParser parser;
+    private JsonArray jsonArray;
+    private JsonObject jsonObject;
     private TwitchVideosApi videosApi;
 
     private static final int VIDEO_ID = 14567223;
@@ -33,6 +38,7 @@ public class TwitchVideosApiTest {
     @Before
     public void setup() {
         gson = new Gson();
+        parser = new JsonParser();
         videosApi = Mockito.mock(TwitchVideosApi.class);
     }
 
@@ -96,9 +102,10 @@ public class TwitchVideosApiTest {
                 "   \"viewable_at\": null," +
                 "   \"views\": 7638" +
                 "}";
-        Response<Video> response = Response.success(gson.fromJson(json, Video.class));
 
-        Mockito.when(videosApi.getVideoById(VIDEO_ID)).thenReturn(response.body());
+        Video response = gson.fromJson(json, Video.class);
+
+        Mockito.when(videosApi.getVideoById(VIDEO_ID)).thenReturn(response);
 
         final Video video = videosApi.getVideoById(VIDEO_ID);
         Assert.assertEquals(video.getId(), "v14567223");
@@ -177,15 +184,22 @@ public class TwitchVideosApiTest {
                 "   ]" +
                 "}";
 
-        Response<TopVideos> response = Response.success(gson.fromJson(json, TopVideos.class));
+        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonArray = jsonObject.get("vods").getAsJsonArray();
 
-        Mockito.when(videosApi.getTopVideos()).thenReturn(response.body());
+        List<Video> response = new ArrayList<>();
 
-        TopVideos topVideos = videosApi.getTopVideos();
-        Assert.assertEquals(2, topVideos.getTopVideos().size());
+        for(int i = 0; i < jsonArray.size(); i++) {
+            response.add(gson.fromJson(jsonArray.get(i), Video.class));
+        }
 
-        Video video1 = topVideos.getTopVideos().get(0);
-        Video video2 = topVideos.getTopVideos().get(1);
+        Mockito.when(videosApi.getTopVideos()).thenReturn(response);
+
+        final List<Video> videoList = videosApi.getTopVideos();
+        Assert.assertEquals(2, videoList.size());
+
+        Video video1 = videoList.get(0);
+        Video video2 = videoList.get(1);
 
         Assert.assertEquals(video1.getId(), "v14567223");
         Assert.assertEquals(video2.getId(), "v24567223");
@@ -193,7 +207,7 @@ public class TwitchVideosApiTest {
     }
 
     @Test
-    public void testGetFollowedVideo() throws Exception {
+    public void testGetFollowedVideos() throws Exception {
         final String json = "{" +
                 "   \"videos\": [{" +
                 "      \"_id\": \"v107666453\"," +
@@ -237,14 +251,18 @@ public class TwitchVideosApiTest {
                 "   }]" +
                 "}";
 
-        Response<FollowedVideos> response = Response.success(gson.fromJson(json, FollowedVideos.class));
+        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonArray = jsonObject.get("videos").getAsJsonArray();
 
-        Mockito.when(videosApi.getFollowedVideos()).thenReturn(response.body());
+        List<Video> response = new ArrayList<>();
+        response.add(gson.fromJson(jsonArray.get(0), Video.class));
 
-        FollowedVideos videos = videosApi.getFollowedVideos();
-        Assert.assertTrue(videos.getVideos().size() == 1);
+        Mockito.when(videosApi.getFollowedVideos()).thenReturn(response);
 
-        Video video = videos.getVideos().get(0);
+        List<Video> videoList = videosApi.getFollowedVideos();
+        Assert.assertTrue(videoList.size() == 1);
+
+        Video video = videoList.get(0);
         Assert.assertEquals("TSM Trump Renolock", video.getTitle());
     }
 }

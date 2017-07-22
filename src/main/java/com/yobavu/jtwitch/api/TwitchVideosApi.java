@@ -396,7 +396,6 @@ public class TwitchVideosApi extends TwitchApi {
         // read() returns -1 when end of file
         // todo make this async?
         while ((bytesRead = is.read(data)) != -1) {
-            // need to set target to uploads.api http
             response = uploadWebTarget.path("upload/" + videoId).queryParam("part", index).queryParam("upload_token", uploadToken)
                         .request()
                         .header("Content-Length", chunkSize)
