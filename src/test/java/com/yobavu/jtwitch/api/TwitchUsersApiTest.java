@@ -69,13 +69,13 @@ public class TwitchUsersApiTest {
         jsonObject = parser.parse(json).getAsJsonObject();
         jsonArray = jsonObject.get("users").getAsJsonArray();
 
-        List<User> userList = new ArrayList<>();
-        userList.add(gson.fromJson(jsonArray.get(0), User.class));
+        List<User> response = new ArrayList<>();
+        response.add(gson.fromJson(jsonArray.get(0), User.class));
 
-        Mockito.when(usersApi.getUsersByUsername("tester")).thenReturn(userList);
+        Mockito.when(usersApi.getUsersByUsername("tester")).thenReturn(response);
 
-        final List<User> users = usersApi.getUsersByUsername("tester");
-        Assert.assertEquals(users.size(), 1);
+        final List<User> userList = usersApi.getUsersByUsername("tester");
+        Assert.assertEquals(userList.size(), 1);
 
         final User user = userList.get(0);
         Assert.assertEquals(1, user.getId());
