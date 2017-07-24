@@ -53,7 +53,7 @@ public class TwitchTeamsApi extends TwitchApi {
      * Gets all active teams.
      *
      * @param limit optional maximum number of teams to return, sorted by creation date. Default: 25, max: 100.
-     * @param offset optional
+     * @param offset optional used for pagination of results. Default: 0.
      */
     public List<Team> getAllTeams(Integer limit, Integer offset) throws TwitchApiException {
         response = webTarget.path("teams").queryParam("limit", limit).queryParam("offset", offset).request().get();
