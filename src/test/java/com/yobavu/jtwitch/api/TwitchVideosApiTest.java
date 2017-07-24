@@ -103,9 +103,7 @@ public class TwitchVideosApiTest {
                 "   \"views\": 7638" +
                 "}";
 
-        Video response = gson.fromJson(json, Video.class);
-
-        Mockito.when(videosApi.getVideoById(VIDEO_ID)).thenReturn(response);
+        Mockito.when(videosApi.getVideoById(VIDEO_ID)).thenReturn(gson.fromJson(json, Video.class));
 
         final Video video = videosApi.getVideoById(VIDEO_ID);
         Assert.assertEquals(video.getId(), "v14567223");
