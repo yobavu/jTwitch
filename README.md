@@ -28,8 +28,8 @@ Twitch API checklist:
  - Games
  - Ingests
  - Search
- - Streams
- - Teams
+ - Streams (In progress)
+ - ~~Teams~~
  - ~~Users~~
  - ~~Videos~~
 
