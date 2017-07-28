@@ -103,13 +103,17 @@ public class TwitchTeamsApiTest {
         jsonObject = parser.parse(json).getAsJsonObject();
         jsonArray = jsonObject.get("teams").getAsJsonArray();
 
-        List<Team> teams = new ArrayList<>();
+        List<Team> response = new ArrayList<>();
 
         for(int i = 0; i < jsonArray.size(); i++) {
-            teams.add(gson.fromJson(jsonArray.get(i), Team.class));
+            response.add(gson.fromJson(jsonArray.get(i), Team.class));
         }
 
-        Assert.assertTrue(teams.size() == 2);
-        Assert.assertEquals("Twitch Support", teams.get(1).getDisplayName());
+        Mockito.when(teamsApi.getAllTeams(null, null)).thenReturn(response);
+
+        final List<Team> teamList = teamsApi.getAllTeams(null, null);
+
+        Assert.assertTrue(teamList.size() == 2);
+        Assert.assertEquals("Twitch Staff", teamList.get(0).getDisplayName());
     }
 }
