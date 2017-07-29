@@ -12,7 +12,7 @@ import javax.ws.rs.client.Client;
  * Abstraction for Twitch API.
  */
 public abstract class TwitchApi {
-    private final String API_URL = "https://api.twitch.tv/kraken/";
+    private static final String API_URL = "https://api.twitch.tv/kraken/";
 
     private Gson gson;
     private Client client;
