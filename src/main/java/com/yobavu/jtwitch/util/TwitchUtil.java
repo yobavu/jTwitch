@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -84,5 +85,25 @@ public final class TwitchUtil {
         ooStream.writeObject(cred);
         ooStream.close();
         outStream.close();
+    }
+
+    /**
+     * Creates a comma separated string value from a list.
+     *
+     * @param list list of values to append together.
+     */
+    public static String stringifyList(List<?> list) {
+        if (list != null) {
+            StringBuilder sb = new StringBuilder();
+
+            for(Object s : list) {
+                sb.append(s);
+                sb.append(",");
+            }
+
+            return sb.deleteCharAt(sb.length() - 1).toString();
+        }
+
+        return null;
     }
 }

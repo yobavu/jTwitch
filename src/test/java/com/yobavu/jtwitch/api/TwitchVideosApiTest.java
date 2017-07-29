@@ -191,9 +191,9 @@ public class TwitchVideosApiTest {
             response.add(gson.fromJson(jsonArray.get(i), Video.class));
         }
 
-        Mockito.when(videosApi.getTopVideos()).thenReturn(response);
+        Mockito.when(videosApi.getTopVideos(null, null, null, null, null, null, null)).thenReturn(response);
 
-        final List<Video> videoList = videosApi.getTopVideos();
+        final List<Video> videoList = videosApi.getTopVideos(null, null, null, null, null, null, null);
         Assert.assertEquals(2, videoList.size());
 
         Video video1 = videoList.get(0);
@@ -255,9 +255,9 @@ public class TwitchVideosApiTest {
         List<Video> response = new ArrayList<>();
         response.add(gson.fromJson(jsonArray.get(0), Video.class));
 
-        Mockito.when(videosApi.getFollowedVideos()).thenReturn(response);
+        Mockito.when(videosApi.getFollowedVideos(null, null, null, null, null)).thenReturn(response);
 
-        List<Video> videoList = videosApi.getFollowedVideos();
+        List<Video> videoList = videosApi.getFollowedVideos(null, null, null, null, null);
         Assert.assertTrue(videoList.size() == 1);
 
         Video video = videoList.get(0);

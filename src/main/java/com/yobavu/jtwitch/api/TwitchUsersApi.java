@@ -50,9 +50,9 @@ public class TwitchUsersApi extends TwitchApi {
     public User getUser() throws TwitchApiException {
         response = webTarget.path("user").request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
-        return super.getGson().fromJson(json, User.class);
+        return super.getGson().fromJson(responseJson, User.class);
     }
 
     /**
@@ -63,9 +63,9 @@ public class TwitchUsersApi extends TwitchApi {
     public User getUserById(int userId) throws TwitchApiException {
         response = webTarget.path("users/" + userId).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
-        return super.getGson().fromJson(json, User.class);
+        return super.getGson().fromJson(responseJson, User.class);
     }
 
     /**
@@ -79,12 +79,12 @@ public class TwitchUsersApi extends TwitchApi {
     public List<User> getUsersByUsername(String username) throws TwitchApiException {
         response = webTarget.path("users").queryParam("login", username).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
-        JsonArray users = jsonObject.get("users").getAsJsonArray();
+        JsonArray users = jsonObject.getAsJsonArray("users");
         List<User> userList = new ArrayList<>();
 
         for (int i = 0; i < users.size(); i++) {
@@ -118,69 +118,31 @@ public class TwitchUsersApi extends TwitchApi {
     public UserSubscription getUserChannelSubscription(int userId, int channelId) throws TwitchApiException {
         response = webTarget.path("users/" + userId).path("subscriptions/" + channelId).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
-        return super.getGson().fromJson(json, UserSubscription.class);
+        return super.getGson().fromJson(responseJson, UserSubscription.class);
     }
 
     /**
      * Gets list of channels followed by specific user.
      *
      * @param userId the id for specific user account.
-     * @param queryParams optional set of parameters:
-     *        <ul>
-     *            <li>
-     *                limit: sets limit of results. Default: 25 and Max: 100.
-     *            </li>
-     *            <li>
-     *                offset: use for pagination of results. Default: 0.
-     *            </li>
-     *            <li>
-     *                direction: sort direction. Valid values: asc and desc. Default: desc.
-     *            </li>
-     *            <li>
-     *                sortby: sort results. Valid values: created_at, last_broadcast, login. Default: created_at.
-     *            </li>
-     *        </ul>
+     * @param limit optional sets limit of results. Default: 25, max: 100.
+     * @param offset optional used for pagination of results. Default: 0.
+     * @param direction optional sorting direction. Valid values: asc, desc. Default: desc.
+     * @param sortby optional how results are sorted. Valid values: created_at, last_broadcast, login. Default: created_at.
      */
-    public List<UserFollow> getChannelsFollowedByUser(int userId, Object... queryParams) throws TwitchApiException {
-        Integer limit = null;
-        Integer offset = null;
-        String direction = null;
-        String sortby = null;
-
-        if (queryParams.length > 4) {
-            throw new IllegalArgumentException("Invalid number of optional parameters");
-        }
-
-        if (queryParams.length > 0) {
-            if (queryParams[0] != null) {
-                limit = (Integer) queryParams[0];
-            }
-
-            if (queryParams[1] != null) {
-                offset = (Integer) queryParams[1];
-            }
-
-            if (queryParams[2] != null) {
-                direction = (String) queryParams[2];
-            }
-
-            if (queryParams[3] != null) {
-                sortby = (String) queryParams[3];
-            }
-        }
-
+    public List<UserFollow> getChannelsFollowedByUser(int userId, Integer limit, Integer offset, String direction, String sortby) throws TwitchApiException {
         response = webTarget.path("users/" + userId).path("follows/channels").queryParam("limit", limit)
                 .queryParam("offset", offset).queryParam("direction", direction).queryParam("sortby", sortby)
                 .request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
-        JsonArray channels = jsonObject.get("follows").getAsJsonArray();
+        JsonArray channels = jsonObject.getAsJsonArray("follows");
         List<UserFollow> followList = new ArrayList<>();
 
         for (int i = 0; i < channels.size(); i++) {
@@ -199,9 +161,9 @@ public class TwitchUsersApi extends TwitchApi {
     public UserFollow checkUserFollowsChannel(int userId, int channelId) throws TwitchApiException {
         response = webTarget.path("users/" + userId).path("follows/channels/" + channelId).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
-        return super.getGson().fromJson(json, UserFollow.class);
+        return super.getGson().fromJson(responseJson, UserFollow.class);
     }
 
     /**
@@ -214,9 +176,9 @@ public class TwitchUsersApi extends TwitchApi {
         response = webTarget.path("users/" + userId).path("follows/channels/" + channelId)
                 .queryParam("notifications", notifications).request().put(Entity.text(""));
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
-        return super.getGson().fromJson(json, UserFollow.class);
+        return super.getGson().fromJson(responseJson, UserFollow.class);
     }
 
     /**
@@ -236,44 +198,20 @@ public class TwitchUsersApi extends TwitchApi {
      *
      * Requires "user_blocks_read" scope.
      *
+     * @param limit optional sets limit of results. Default: 25, max: 100.
+     * @param offset optional used for pagination of results. Default: 0.
      * @param userId the id of specific user account.
-     * @param queryParams optional set of parameters:
-     *        <ul>
-     *            <li>
-     *                limit: sets limit of results. Default: 25 and Max: 100.
-     *            </li>
-     *            <li>
-     *                offset: use for pagination of results. Default: 0.
-     *            </li>
-     *        </ul>
      */
-    public List<UserBlock> getUserBlockList(int userId, Object... queryParams) throws TwitchApiException {
-        Integer limit = null;
-        Integer offset = null;
-
-        if (queryParams.length > 2) {
-            throw new IllegalArgumentException("Invalid number of optional parameters");
-        }
-
-        if (queryParams.length > 0) {
-            if (queryParams[0] != null) {
-                limit = (Integer) queryParams[0];
-            }
-
-            if (queryParams[1] != null) {
-                offset = (Integer) queryParams[1];
-            }
-        }
-
+    public List<UserBlock> getUserBlockList(int userId, Integer limit, Integer offset) throws TwitchApiException {
         response = webTarget.path("users/" + userId).path("blocks").queryParam("limit", limit).queryParam("offset", offset)
                 .request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
-        JsonArray channels = jsonObject.get("blocks").getAsJsonArray();
+        JsonArray channels = jsonObject.getAsJsonArray("blocks");
         List<UserBlock> blockList = new ArrayList<>();
 
         for (int i = 0; i < channels.size(); i++) {
@@ -294,9 +232,9 @@ public class TwitchUsersApi extends TwitchApi {
     public UserBlock blockUser(int userId, int blockId) throws TwitchApiException {
         response = webTarget.path("users/" + userId).path("blocks/" + blockId).request().put(Entity.text(""));
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
-        return super.getGson().fromJson(json, UserBlock.class);
+        return super.getGson().fromJson(responseJson, UserBlock.class);
     }
 
     /**

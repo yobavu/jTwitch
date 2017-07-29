@@ -7,6 +7,7 @@ package com.yobavu.jtwitch.api;
 import com.yobavu.jtwitch.error.ErrorParser;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.Video;
+import com.yobavu.jtwitch.util.TwitchUtil;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -62,128 +63,37 @@ public class TwitchVideosApi extends TwitchApi {
     public Video getVideoById(int videoId) throws TwitchApiException {
         response = webTarget.path("videos/" + videoId).request().get();
         ErrorParser.checkForErrors(response);
+        String responseJson = response.readEntity(String.class);
 
-        String json = response.readEntity(String.class);
-        return super.getGson().fromJson(json, Video.class);
+        return super.getGson().fromJson(responseJson, Video.class);
     }
 
     /**
      * Gets the top videos based on view count.
      *
-     * @param queryParams optional set of parameters:
-     *        <ul>
-     *            <li>
-     *                limit: sets limit of results. Default: 10 and max: 100.
-     *            </li>
-     *            <li>
-     *                offset: used for pagination of results. Default: 0.
-     *            </li>
-     *            <li>
-     *                game: constraints videos by games.
-     *            </li>
-     *            <li>
-     *                period: specifies the window of time to search. Valid values: week, month, all. Default: week
-     *            </li>
-     *            <li>
-     *                broadcastTypes: constraints videos by type. Valid values: archive, highlight, upload.
-     *                                Default: all types (no filter).
-     *            </li>
-     *            <li>
-     *                language: constraints videos by language. Example values: en, es.
-     *            </li>
-     *            <li>
-     *                sort: sort videos returned: Valid values:
-     *                   <ul>
-     *                      <li>
-     *                         time: videos are sorted by publication time, most recent first.
-     *                      </li>
-     *                      <li>
-     *                         views: videos are sorted by view count, in descending order.
-     *                      </li>
-     *                   </ul>
-     *            </li>
-     *        </ul>
+     * @param limit optional max number of videos to return, sorted by creation date. Default: 10, max: 100.
+     * @param offset optional used for pagination of results. Default: 0.
+     * @param game optional constraints videos returned by games.
+     * @param period optional specifies the window of time to search. Valid values: week, month, all. Default: week.
+     * @param broadcastList optional constraints videos by type. Valid values: archive, highlight, upload. Default: no filters.
+     * @param languageList optional constraints videos by language. Example values: en, es.
+     * @param sort optional sort videos returned. Valid values: time (sorted by publication time - most recent first) and views (sorted by view count - descending).
      */
-    public List<Video> getTopVideos(Object... queryParams) throws TwitchApiException {
-        Integer limit = null;
-        Integer offset = null;
-        String game = null;
-        String period = null;
-        String broadcastType = null;
-        String language = null;
-        String sort = null;
-
-        List<String> languageList = null;
-        List<String> broadcastTypeList = null;
-
-        StringBuilder sb;
-
-        if (queryParams.length > 7) {
-            throw new IllegalArgumentException("Invalid number of optional parameters");
-        }
-
-        if (queryParams.length > 0) {
-            sb = new StringBuilder();
-
-            // check for optional parameters
-            if (queryParams[0] != null) {
-                limit = (Integer) queryParams[0];
-            }
-
-            if (queryParams[1] != null) {
-                offset = (Integer) queryParams[1];
-            }
-
-            if (queryParams[2] != null) {
-                game = (String) queryParams[2];
-            }
-
-            if (queryParams[3] != null) {
-                period = (String) queryParams[3];
-            }
-
-            if (queryParams[4] != null) {
-                broadcastTypeList = (List<String>) queryParams[4];
-
-                for (String s : broadcastTypeList) {
-                    sb.append(s);
-                    sb.append(",");
-                }
-
-                // cut out last comma
-                sb.deleteCharAt(sb.length() - 1);
-                broadcastType = sb.toString();
-
-                sb.setLength(0);
-            }
-
-            if (queryParams[5] != null) {
-                languageList = (List<String>) queryParams[5];
-
-                for (String s : languageList) {
-                    sb.append(s);
-                    sb.append(",");
-                }
-
-                sb.deleteCharAt(sb.length() - 1);
-                language = sb.toString();
-            }
-
-            if (queryParams[6] != null) {
-                sort = (String) queryParams[6];
-            }
-        }
+    public List<Video> getTopVideos(Integer limit, Integer offset, String game, String period, List<String> broadcastList,
+                                    List<String> languageList, String sort) throws TwitchApiException {
+        String broadcastTypes = TwitchUtil.stringifyList(broadcastList);
+        String languages = TwitchUtil.stringifyList(languageList);
 
         response = webTarget.path("videos/top").queryParam("limit", limit).queryParam("offset", offset)
-                    .queryParam("game", game).queryParam("period", period).queryParam("broadcast_type", broadcastType)
-                    .queryParam("language", language).queryParam("sort", sort).request().get();
+                    .queryParam("game", game).queryParam("period", period).queryParam("broadcast_type", broadcastTypes)
+                    .queryParam("language", languages).queryParam("sort", sort).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
-        JsonArray videos = jsonObject.get("vods").getAsJsonArray();
+        JsonArray videos = jsonObject.getAsJsonArray("vods");
         List<Video> videoList = new ArrayList<>();
 
         for (int i = 0; i < videos.size(); i++) {
@@ -198,105 +108,27 @@ public class TwitchVideosApi extends TwitchApi {
      *
      * Requires "user_read" scope.
      *
-     * @param queryParams optional set of parameters:
-     *        <ul>
-     *            <li>
-     *                limit: sets limit of results. Default: 10 and max: 100.
-     *            </li>
-     *            <li>
-     *                offset: used for pagination of results. Default: 0.
-     *            </li>
-     *            <li>
-     *                broadcastTypes: constraints videos by type. Valid values: archive, highlight, upload.
-     *                                Default: all types (no filter).
-     *            </li>
-     *            <li>
-     *                language: constraints videos by language. Example values: en, es.
-     *            </li>
-     *            <li>
-     *                sort: sort videos returned: Valid values:
-     *                   <ul>
-     *                      <li>
-     *                         time: videos are sorted by publication time, most recent first.
-     *                      </li>
-     *                      <li>
-     *                         views: videos are sorted by view count, in descending order.
-     *                      </li>
-     *                   </ul>
-     *            </li>
-     *        </ul>
+     * @param limit optional max number of videos to return, sorted by creation date. Default: 10, max: 100.
+     * @param offset optional used for pagination of results. Default: 0.
+     * @param broadcastList optional constraints videos by type. Valid values: archive, highlight, upload. Default: no filters.
+     * @param languageList optional constraints videos by language. Example values: en, es.
+     * @param sort optional sort videos returned. Valid values: time (sorted by publication time - most recent first) and views (sorted by view count - descending).
      */
-    public List<Video> getFollowedVideos(Object... queryParams) throws TwitchApiException {
-        Integer limit = null;
-        Integer offset = null;
-        String broadcastType = null;
-        String language = null;
-        String sort = null;
-
-        List<String> broadcastTypeList;
-        List<String> languageList;
-
-        StringBuilder sb;
-
-        if (queryParams.length > 5) {
-            throw new IllegalArgumentException("Invalid number of optional parameters");
-        }
-
-        if (queryParams.length > 0) {
-            sb = new StringBuilder();
-
-            if (queryParams[0] != null) {
-                limit = (Integer) queryParams[0];
-            }
-
-            if (queryParams[1] != null) {
-                offset = (Integer) queryParams[1];
-            }
-
-            if (queryParams[2] != null) {
-                broadcastTypeList = (List<String>) queryParams[2];
-
-                for (String s: broadcastTypeList) {
-                    sb.append(s);
-                    sb.append(",");
-                }
-
-                sb.deleteCharAt(sb.length() - 1);
-                broadcastType = sb.toString();
-
-                // clear out buffer
-                sb.setLength(0);
-            }
-
-            if (queryParams[3] != null) {
-                languageList = (List<String>) queryParams[3];
-
-                for (String s: languageList) {
-                    sb.append(s);
-                    sb.append(",");
-                }
-
-                sb.deleteCharAt(sb.length() - 1);
-                language = sb.toString();
-
-                sb.setLength(0);
-            }
-
-            if (queryParams[4] != null) {
-                sort = (String) queryParams[4];
-            }
-        }
+    public List<Video> getFollowedVideos(Integer limit, Integer offset, List<String> broadcastList, List<String> languageList,
+                                         String sort) throws TwitchApiException {
+        String broadcastTypes = TwitchUtil.stringifyList(broadcastList);
+        String languages = TwitchUtil.stringifyList(languageList);
 
         response = webTarget.path("videos/followed").queryParam("limit", limit).queryParam("offset", offset)
-                .queryParam("broadcast_type", broadcastType).queryParam("language", language)
+                .queryParam("broadcast_type", broadcastTypes).queryParam("language", languages)
                 .queryParam("sort", sort).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
-        JsonArray videos = jsonObject.get("videos").getAsJsonArray();
+        JsonArray videos = jsonObject.getAsJsonArray("videos");
         List<Video> videoList = new ArrayList<>();
 
         for (int i = 0; i < videos.size(); i++) {
@@ -316,49 +148,26 @@ public class TwitchVideosApi extends TwitchApi {
      *
      * @param description optional description of video.
      * @param game optional name of game in video.
-     * @param language optional language(s) of video. Example values: en, es.
+     * @param languageList optional language(s) of video. Example values: en, es.
      * @param tagList optional tag(s) describing the video. Max 100 char for a tag, 500 char total. Example values: walkthrough,shooter.
      * @param viewable optional specifies who can view video. Valid values: public, private. Default: public.
      * @param viewableAt optional date when video becomes public. Only applies if viewable=private.
      */
     public Map<String, String> createVideo(int channelId, String videoTitle, String description, String game,
-                                           List<String> language, List<String> tagList, VIEWABLE viewable,
+                                           List<String> languageList, List<String> tagList, VIEWABLE viewable,
                                            Date viewableAt) throws TwitchApiException {
-        String tags = "", languages = "";
-        StringBuilder sb = new StringBuilder();
-
-        if (viewable == null) {
-            viewable = VIEWABLE.PUBLIC;
-        }
-
-        if (language != null) {
-            for (String lang : language) {
-                sb.append(lang);
-                sb.append(",");
-            }
-
-            languages = sb.deleteCharAt(sb.length() - 1).toString();
-            sb.setLength(0);
-        }
-
-        if (tagList != null) {
-            for (String tag : tagList) {
-                sb.append(tag);
-                sb.append(",");
-            }
-
-            tags = sb.deleteCharAt(sb.length() - 1).toString();
-        }
+        String languages = TwitchUtil.stringifyList(languageList);
+        String tags = TwitchUtil.stringifyList(tagList);
 
         response = webTarget.path("videos").queryParam("channel_id", channelId).queryParam("title", videoTitle)
                     .queryParam("description", description).queryParam("game", game).queryParam("language", languages)
                     .queryParam("tag_list", tags).queryParam("viewable", viewable.value).queryParam("viewable_at", viewableAt)
                     .request().post(Entity.text(""));
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
         Video video = super.getGson().fromJson(jsonObject.get("video"), Video.class);
 
@@ -421,32 +230,13 @@ public class TwitchVideosApi extends TwitchApi {
      *
      * @param description optional short description of video.
      * @param game optional name of game in video.
-     * @param language optional language(s) of video. Example values: en, es.
+     * @param languageList optional language(s) of video. Example values: en, es.
      * @param tagList optional tag(s) describing the video. Max 100 char for a tag, 500 char total. Example values: walkthrough,shooter.
      */
     public Video updateVideo(String videoId, String videoTitle, String description, String game,
-                             List<String> language, List<String> tagList) throws TwitchApiException {
-        String tags = "", languages = "";
-        StringBuilder sb = new StringBuilder();
-
-        if (language != null) {
-            for (String lang : language) {
-                sb.append(lang);
-                sb.append(",");
-            }
-
-            languages = sb.deleteCharAt(sb.length() - 1).toString();
-            sb.setLength(0);
-        }
-
-        if (tagList != null) {
-            for (String tag : tagList) {
-                sb.append(tag);
-                sb.append(",");
-            }
-
-            tags = sb.deleteCharAt(sb.length() - 1).toString();
-        }
+                             List<String> languageList, List<String> tagList) throws TwitchApiException {
+        String languages = TwitchUtil.stringifyList(languageList);
+        String tags = TwitchUtil.stringifyList(tagList);
 
         // substring used because videoId is in format: v########...
         // so strip out the first letter
@@ -454,9 +244,9 @@ public class TwitchVideosApi extends TwitchApi {
                     .queryParam("game", game).queryParam("language", languages).queryParam("tag_list", tags)
                     .request().put(Entity.text(""));
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
-        return super.getGson().fromJson(json, Video.class);
+        return super.getGson().fromJson(responseJson, Video.class);
     }
 
     /**

@@ -7,6 +7,7 @@ package com.yobavu.jtwitch.model;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * A Twitch stream.
@@ -37,7 +38,7 @@ public class Stream {
     private boolean playlist;
 
     @SerializedName("preview")
-    private Preview preview;
+    private Map<String, String> preview;
 
     @SerializedName("channel")
     private Channel channel;
@@ -101,7 +102,7 @@ public class Stream {
     /**
      * Gets stream preview images.
      */
-    public Preview getPreview() {
+    public Map<String, String> getPreview() {
         return preview;
     }
 
@@ -110,47 +111,5 @@ public class Stream {
      */
     public Channel getChannel() {
         return channel;
-    }
-
-    public class Preview {
-        @SerializedName("small")
-        private String smallPreview;
-
-        @SerializedName("medium")
-        private String mediumPreview;
-
-        @SerializedName("large")
-        private String largePreview;
-
-        @SerializedName("template")
-        private String templatePreview;
-
-        /**
-         * Gets the small preview image.
-         */
-        public String getSmallPreview() {
-            return smallPreview;
-        }
-
-        /**
-         * Gets the medium preview image.
-         */
-        public String getMediumPreview() {
-            return mediumPreview;
-        }
-
-        /**
-         * Gets the large preview image.
-         */
-        public String getLargePreview() {
-            return largePreview;
-        }
-
-        /**
-         * Gets the template preview image.
-         */
-        public String getTemplatePreview() {
-            return templatePreview;
-        }
     }
 }

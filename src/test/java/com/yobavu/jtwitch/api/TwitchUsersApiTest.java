@@ -235,9 +235,9 @@ public class TwitchUsersApiTest {
             response.add(gson.fromJson(jsonArray.get(i), UserFollow.class));
         }
 
-        Mockito.when(usersApi.getChannelsFollowedByUser(USER_ID)).thenReturn(response);
+        Mockito.when(usersApi.getChannelsFollowedByUser(USER_ID, null, null, null, null)).thenReturn(response);
 
-        final List<UserFollow> follows = usersApi.getChannelsFollowedByUser(USER_ID);
+        final List<UserFollow> follows = usersApi.getChannelsFollowedByUser(USER_ID, null, null, null, null);
         Assert.assertEquals(2, follows.size());
 
         final UserFollow follow1 = follows.get(0);
@@ -333,9 +333,9 @@ public class TwitchUsersApiTest {
             response.add(gson.fromJson(jsonArray.get(i), UserBlock.class));
         }
 
-        Mockito.when(usersApi.getUserBlockList(USER_ID)).thenReturn(response);
+        Mockito.when(usersApi.getUserBlockList(USER_ID, null, null)).thenReturn(response);
 
-        List<UserBlock> userBlockList = usersApi.getUserBlockList(USER_ID);
+        List<UserBlock> userBlockList = usersApi.getUserBlockList(USER_ID, null, null);
         Assert.assertEquals(1, userBlockList.size());
 
         final UserBlock blocked = userBlockList.get(0);

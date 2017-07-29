@@ -8,6 +8,7 @@ import com.yobavu.jtwitch.error.ErrorParser;
 import com.yobavu.jtwitch.exceptions.TwitchApiException;
 import com.yobavu.jtwitch.model.FeaturedStream;
 import com.yobavu.jtwitch.model.Stream;
+import com.yobavu.jtwitch.util.TwitchUtil;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -48,10 +49,10 @@ public class TwitchStreamsApi extends TwitchApi {
     public Stream getStreamByChannel(int channelId, String streamType) throws TwitchApiException {
         response = webTarget.path("streams/" + channelId).queryParam("stream_type", streamType).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
         return (jsonObject.get("stream").isJsonNull()) ? null : super.getGson().fromJson(jsonObject.get("stream"), Stream.class);
     }
@@ -68,37 +69,18 @@ public class TwitchStreamsApi extends TwitchApi {
      */
     public List<Stream> getLiveStreams(List<Integer> channelIds, String game, List<String> languageList, String streamType,
                                        Integer limit, Integer offset) throws TwitchApiException {
-        String channels = null, languages = null;
-        StringBuilder sb = new StringBuilder();
-
-        if (channelIds != null) {
-            for(Integer id : channelIds) {
-                sb.append(id);
-                sb.append(",");
-            }
-
-            channels = sb.deleteCharAt(sb.length() - 1).toString();
-            sb.setLength(0);
-        }
-
-        if (languageList != null) {
-            for(String lang : languageList) {
-                sb.append(lang);
-                sb.append(",");
-            }
-
-            languages = sb.deleteCharAt(sb.length() - 1).toString();
-        }
+        String channels = TwitchUtil.stringifyList(channelIds);
+        String languages = TwitchUtil.stringifyList(languageList);
 
         response = webTarget.path("streams").queryParam("channel", channels).queryParam("game", game)
                     .queryParam("language", languages).queryParam("stream_type", streamType)
                     .queryParam("limit", limit).queryParam("offset", offset)
                     .request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
         JsonArray streams = jsonObject.getAsJsonArray("streams");
         List<Stream> streamList = new ArrayList<>();
@@ -118,10 +100,10 @@ public class TwitchStreamsApi extends TwitchApi {
     public Map<String, Integer> getStreamsSummary(String game) throws TwitchApiException {
         response = webTarget.path("streams/summary").queryParam("game", game).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
         Map<String, Integer> data = new HashMap<>();
         data.put("channels", jsonObject.get("channels").getAsInt());
@@ -140,10 +122,10 @@ public class TwitchStreamsApi extends TwitchApi {
         response = webTarget.path("streams/featured").queryParam("limit", limit).queryParam("offset", offset)
                     .request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
         JsonArray featuredStreams = jsonObject.getAsJsonArray("featured");
         List<FeaturedStream> featuredStreamList = new ArrayList<>();
@@ -168,9 +150,10 @@ public class TwitchStreamsApi extends TwitchApi {
         response = webTarget.path("streams/followed").queryParam("stream_type", streamType).queryParam("limit", limit)
                     .queryParam("offset", offset).request().get();
         ErrorParser.checkForErrors(response);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(response.readEntity(String.class)).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
         JsonArray followedStreams = jsonObject.getAsJsonArray("streams");
         List<Stream> followedStreamsList = new ArrayList<>();

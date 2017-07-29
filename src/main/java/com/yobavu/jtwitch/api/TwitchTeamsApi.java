@@ -44,9 +44,9 @@ public class TwitchTeamsApi extends TwitchApi {
     public Team getTeamByName(String name) throws TwitchApiException {
         response = webTarget.path("teams/" + name).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
-        return super.getGson().fromJson(json, Team.class);
+        return super.getGson().fromJson(responseJson, Team.class);
     }
 
     /**
@@ -58,12 +58,12 @@ public class TwitchTeamsApi extends TwitchApi {
     public List<Team> getAllTeams(Integer limit, Integer offset) throws TwitchApiException {
         response = webTarget.path("teams").queryParam("limit", limit).queryParam("offset", offset).request().get();
         ErrorParser.checkForErrors(response);
-        String json = response.readEntity(String.class);
+        String responseJson = response.readEntity(String.class);
 
         parser = new JsonParser();
-        jsonObject = parser.parse(json).getAsJsonObject();
+        jsonObject = parser.parse(responseJson).getAsJsonObject();
 
-        JsonArray teams = jsonObject.get("teams").getAsJsonArray();
+        JsonArray teams = jsonObject.getAsJsonArray("teams");
         List<Team> teamList = new ArrayList<>();
 
         for(int i = 0; i < teams.size(); i++) {

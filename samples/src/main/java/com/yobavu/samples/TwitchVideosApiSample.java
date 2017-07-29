@@ -53,7 +53,7 @@ public class TwitchVideosApiSample {
         System.out.println("Channel video belongs to: " + video.getChannel().getDisplayName());
 
         System.out.println("Videos from followed channels");
-        List<Video> vids = videosApi.getFollowedVideos();
+        List<Video> vids = videosApi.getFollowedVideos(null, null, null, null, null);
 
         for (Video v: vids) {
             System.out.println("Title: " + v.getTitle());

@@ -87,7 +87,6 @@ public class Team {
 
     /**
      * Gets team's logo.
-     * @return
      */
     public String getLogo() {
         return logo;

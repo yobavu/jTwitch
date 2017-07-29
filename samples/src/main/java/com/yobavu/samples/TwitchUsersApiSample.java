@@ -87,7 +87,7 @@ public class TwitchUsersApiSample {
     }
 
     private static void channelsFollowed(TwitchUsersApi usersApi, int userId) throws TwitchApiException {
-        List<UserFollow> userFollowList = usersApi.getChannelsFollowedByUser(userId);
+        List<UserFollow> userFollowList = usersApi.getChannelsFollowedByUser(userId, null, null, null, null);
 
         System.out.println("User is following:");
 
