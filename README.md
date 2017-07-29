@@ -28,7 +28,7 @@ Twitch API checklist:
  - Games
  - Ingests
  - Search
- - Streams (In progress)
+ - ~~Streams~~
  - ~~Teams~~
  - ~~Users~~
  - ~~Videos~~
@@ -61,9 +61,7 @@ There are a few samples in `samples/src/main`.
 
 Download
 --------
-The latest JAR is available on the release page.
-
-Or, you can package your own JAR file using maven: `mvn package`.
+You can package your own JAR file using maven: `mvn package`.
 
 License
 -------
